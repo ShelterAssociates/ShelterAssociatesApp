@@ -1,0 +1,7 @@
+, "Enter the 4-digit Household Code" :
+{
+	"id" : "0",
+	"required" : "true",
+	"type" : "I",
+	"weight" : "2"
+}

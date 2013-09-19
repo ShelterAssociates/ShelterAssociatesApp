@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="goToSurveys"
+        android:text="@string/index_do"
+        android:textSize="20sp"
+        android:height = "50sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="goToUpload"
+        android:text="@string/index_upload"
+        android:textSize="20sp"
+        android:height = "50sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="goToDownload"
+        android:text="@string/index_download"
+        android:textSize="20sp"
+        android:height = "50sp" />
+
+</LinearLayout>

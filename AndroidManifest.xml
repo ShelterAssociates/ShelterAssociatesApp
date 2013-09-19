@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="shelter.android.survey.classes"
+      android:versionCode="1"
+      android:versionName="1.0">
+      
+    <uses-permission android:name="android.permission.INTERNET" /> 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    
+    <application android:icon="@drawable/icon" 
+        android:allowBackup="true"
+        android:debuggable="true" 
+        android:label="@string/app_name" 
+        android:theme="@style/AppBaseTheme">
+        
+        <activity android:name=".Index"
+                  android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+        <activity android:name=".MainSurvey"
+                  android:label="@string/app_name"
+            	  android:configChanges="keyboardHidden|orientation">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".SlumSelect" />
+        </activity>
+        
+        
+        <activity android:name=".UploadExisting"
+                  android:label="@string/app_name"
+                  android:configChanges="keyboardHidden|orientation">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".Index" />
+        </activity>
+        
+        <activity android:name=".SurveySelect"
+                  android:label="@string/app_name">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".Index" />
+        </activity>
+        
+        <activity android:name=".SlumSelect"
+                  android:label="@string/app_name">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".SurveySelect" />
+        </activity>
+        
+    </application>
+    <uses-sdk android:minSdkVersion="5" />
+</manifest> 

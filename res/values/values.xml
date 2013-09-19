@@ -1,0 +1,17 @@
+<resources>
+    
+	<style name="CustomTitleStyle" parent="android:style/TextAppearance">
+         <item name="android:textSize">25sp</item>
+         <item name="android:height">180dp</item>
+    </style>
+    
+	<style name="CustomTextStyle" parent="android:style/TextAppearance">
+         <item name="android:textSize">25sp</item>
+         <item name="android:height">200dp</item>
+    </style>
+    
+
+    <style name = "CustomCheckBox" parent="android:style/TextAppearance">
+		 <item name="android:textSize">18sp</item>
+	 </style>
+</resources>

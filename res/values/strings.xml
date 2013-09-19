@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">Shelter Android Survey</string>
+    <string name="action_settings">Settings</string>
+    <string name="index_do">Do Surveys</string>
+    <string name="index_upload">Upload Completed Survey</string>
+    <string name="index_download">Download All Surveys</string>
+    <string name="upload_existing">Upload Selected Surveys</string>
+    
+</resources>
