@@ -27,7 +27,6 @@ public class SlumSelect extends FormActivity
         final String surveyId = (String) getIntent().getExtras().get("surveyId");
         final String surveyName = (String) getIntent().getExtras().get("surveyName");
         setTitle(surveyName);
-       // Log.i("Log", "onCreate" + get(0));
         // Prepare the 'Continue' button
 		Button bt = new Button(this);
 		bt.setText("Continue");

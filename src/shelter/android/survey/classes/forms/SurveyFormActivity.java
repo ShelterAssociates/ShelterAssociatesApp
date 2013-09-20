@@ -35,8 +35,6 @@ import android.widget.Toast;
  */
 public abstract class SurveyFormActivity extends FormActivity
 {
-	
-
 	// -- data
 	int subIndex = 0;
 	Button bt, bt2;
@@ -52,9 +50,10 @@ public abstract class SurveyFormActivity extends FormActivity
 	// -----------------------------------------------
 
 	/**
-	 * parses a supplied schema of raw json data and creates widgets
-	 * @param data - the raw json data as a String
-	 * @return 
+	 * generateForm(String[] params, final DatabaseHandler db, ArrayList<String> subSects)
+	 * takes a String Array of parameters, pm, a DatabaseHandler object, db, and an ArrayList
+	 * of existing subSections. From the params parameter, it uses [0], which is a raw JSON file, 
+	 * to generate each widget which is displayed to the user on a LinearLayout.
 	 */
 	public LinearLayout generateForm(String[] params, final DatabaseHandler db, ArrayList<String> subSects)
 	{
@@ -62,7 +61,7 @@ public abstract class SurveyFormActivity extends FormActivity
 		_map = new HashMap<String, FormWidget>();
 		this.subSects = subSects;
 		
-		String data = params[0];
+		final String data = params[0];
 		final String slum = params[1];
 		final String slumName = params[2];
 		String sectionName = params[3];
@@ -167,6 +166,7 @@ public abstract class SurveyFormActivity extends FormActivity
 
 			if(!section.getString("sub_section").equals(null) && !partOfSub)
 			{
+				
 				try{
 					subIndex = subSects.size();
 				}
@@ -174,9 +174,10 @@ public abstract class SurveyFormActivity extends FormActivity
 				{
 					subSects = new ArrayList<String>();
 				}
-
 				final ArrayList<String> subSects2 = subSects;
-				final String finalName = section.getString("name");
+
+				final String finalName = sectionName;
+
 				//final int sectionNo = Integer.valueOf(section.getString("id"));
 				name = section.getString("name");
 				bt = new Button(this);
@@ -190,7 +191,7 @@ public abstract class SurveyFormActivity extends FormActivity
 						subIndex ++;
 						ArrayList<String> subSections = subSects2;
 						subSections.add(finalName);	
-						
+						Log.i("Log", "Passing " + finalName + " in Intent as section");
 						Intent intent = new Intent(v.getContext(), MainSurvey.class);
 						intent.putExtra("subSections" , subSections);
 						intent.putExtra("slumName", slumName);

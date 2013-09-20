@@ -33,18 +33,12 @@ public class OrderedSpinner extends FormWidget
 	protected Map<String, String> _orderMap = new HashMap<String, String>();
 	protected ArrayList<String> _slumOrdered = new ArrayList<String>();
 
-	// -----------------------------------------------
-	//
-	// FormSpinner._order
-	// 
-	// Arraylist<String> _order takes each number value
-	// from the JSONObject options, then sorts and uses
-	// the sorted array to add choices to the layout
-	// in the proper order specified in the survey.
-	//		Required as JSONObjects do not maintain 
-	//		order while being manipulated.
-	//
-	// -----------------------------------------------
+	/*
+	 * Twin version of FormSpinner, duplicate except
+	 * from the ordering of options in the spinner,
+	 * Ordered alphabetically in this version to make
+	 * SelectSlum more user-friendly.
+	*/
 
 	public OrderedSpinner( Context context, String property, JSONObject options, String id, String type ) 
 	{

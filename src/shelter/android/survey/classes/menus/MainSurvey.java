@@ -30,24 +30,16 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 
-//Test
-
-/* Version 1.5 - David Stark - 8/8/13
+/** MainSurvey 20/09/2013 - David Stark
  * 
- * - Survey data now saving and populating
- * from database dependent on PK taken from
- * Surveys table on opening of particular slum.
- * 
- * - If survey record does not exist, new row is
- * created, if it does exist, old row is opened and 
- * populated from matching key in Facts table.
- * 
- * Version 1.6 - David Stark - 8/8/13
- * 
- * - All validation now completes correctly,
- * showing warning signals next to improperly 
- * completed widgets. Does not save while there
- * is any active warning. 
+ * MainSurvey is the class which renders the survey. 
+ * It uses the SurveyFormActivity class to generate
+ * the Layout for the survey and attaches the sideBar 
+ * view, the listener for the back button and the 
+ * initiation of the menu with the Save, SaveasDraft, 
+ * Load and Cancel buttons. This class requires an Intent 
+ * with details of the SlumId, Slum name, subSections, 
+ * householdId, survey and section Name.
  * 
  */
 
@@ -57,10 +49,8 @@ public class MainSurvey extends SurveyFormActivity
 	public static final int OPTION_LOAD = 1;
 	public static final int OPTION_CANCEL = 2;
 	public static final int OPTION_SAVEDRAFT = 4;
-	public static final int OPTION_SCROLL = 5;
 	private ListView mDrawerList;
 	FrameLayout mContentFrame;
-	//private String[] sections;
 	private ArrayList<String> subSections = new ArrayList<String>();
 	JSONObject obj = new JSONObject();
 	ArrayList<String> sections = new ArrayList<String>();
@@ -84,13 +74,21 @@ public class MainSurvey extends SurveyFormActivity
 		subSections = getIntent().getExtras().getStringArrayList("subSections");
 		householdId = (String)getIntent().getExtras().get("householdId");
 		survey = (String)getIntent().getExtras().get("surveyId");
-		// Render The main survey area
 		section = (String) getIntent().getExtras().get("section");
-		setTitle(slumName + " - " + section);
-		setContentView(R.layout.main);
 		String json_data = parseDownloadToString( "all_surveys.json" );
 		key = init(slum, survey, householdId);
+		//Setting the title to display in the form SlumName - SectionName
+		setTitle(slumName + " - " + section);
+		// Render The main survey area
+		setContentView(R.layout.main);
+
 		
+		/*
+		 * If section is passed as an empty String, it's the 
+		 * first time the survey has been opened. We then need
+		 * to read the existing subsections from the Database.
+		 *
+		 */
 		
 		if(section.equals(""))
 		{
@@ -114,14 +112,21 @@ public class MainSurvey extends SurveyFormActivity
 			mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
 			mDrawerList.setDividerHeight(15);
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// Display existing facts
+		// Load existing facts for the current survey
 		DatabaseHandler db = new DatabaseHandler(this);
 		populate(db, key);
 	}
-//
+	
+	/*
+	 * DrawerItemClickListener is the class which is called when 
+	 * any of the items on the Side Bar are selected by the user.
+	 * The listener calls the selectItem method, which takes the index
+	 * of the item selected, and a new intent uses that index to generate
+	 * a new form with the section at the selected index.
+	 *
+	 */
 	private class DrawerItemClickListener implements ListView.OnItemClickListener {
 
 		@Override
@@ -132,9 +137,9 @@ public class MainSurvey extends SurveyFormActivity
 		}
 	}
 
+
 	private void selectItem(int position)
 	{
-		//sections.get(position);
 		section = sections.get(position);
 		Intent intent = new Intent(this, MainSurvey.class);
 		intent.putExtra("slum", slum);
@@ -146,7 +151,15 @@ public class MainSurvey extends SurveyFormActivity
 		mDrawerList.setItemChecked(position, true);
 	    startActivity(intent);
 	}
-
+	
+	/*
+	 * init(String slum, String survey, String householdId) checks for 
+	 * the existence of a survey entry in the database by using the parameters
+	 * as a compound key. Helper methods in the DatabaseHandler class are used, 
+	 * and if there is a survey entry, it returns the key for the table, else it
+	 * creates the survey entry and returns the key of the new entry.
+	 */
+	
 	public String init(String slum, String survey, String householdId)
 	{
 		if (db.isInSurvey(slum, survey, householdId) == null)
@@ -157,6 +170,15 @@ public class MainSurvey extends SurveyFormActivity
 
 		return db.isInSurvey(slum, survey, householdId);
 	}
+	
+	/*
+	 * getSubSections() uses the key in the current instance to 
+	 * lookup the subSections that are in the Database for this 
+	 * instance. Returns an ArrayList of the names of the sections
+	 * to which the subSections belong.
+	 * 
+	 */
+	
 	
 	public ArrayList<String> getSubSections()
 	{
