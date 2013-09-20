@@ -1,4 +1,4 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.menus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "Survey";
 	public static final String TABLE_FACTS = "facts";
 	public static final String TABLE_SURVEYS = "surveys";
-
+//
 	public static final String KEY_PK = "pk";
 	public static final String KEY_QID = "qid";
 	public static final String KEY_FACT = "fact";
@@ -105,7 +105,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 	public String isInSurvey(String slum, String survey, String householdId)
 	{
-		Log.i("Log", "Slum - " + slum + " Survey - " + survey);
 		SQLiteDatabase db = this.getWritableDatabase();
 		String selectQuery = "SELECT  * FROM " + TABLE_SURVEYS + " WHERE " + KEY_SURVEYID + " = '" + survey + "' AND " + 
 		KEY_HOUSEHOLD + " ='" + householdId + "' AND " + KEY_SLUMID + " = " + slum;
@@ -132,12 +131,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		values.put(KEY_SLUMID, slumId);
 		values.put(KEY_COMPLETE, 0);
 		db.insert(TABLE_SURVEYS, null, values);
-		Log.i("Log", "Creating new Survey entry" );
 		db.close();
 	}
 
 
-	void addQuestion(String qid, String answer, int subId, String key)
+	public void addQuestion(String qid, String answer, int subId, String key)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -146,11 +144,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		values.put(KEY_SURVEY, key);
 		values.put(KEY_SUBSECTION, subId);
 		db.insert(TABLE_FACTS, null, values);
-		Log.i("Log", "addQuestion() - Creating question - " + qid + " with answer " + answer);
 		db.close();
 	}
 
-	ArrayList<List<String>> getQuestions(String surveyForeignKey)
+	public ArrayList<List<String>> getQuestions(String surveyForeignKey)
 	{
 		ArrayList<List<String>> questions = new ArrayList<List<String>>();
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -172,7 +169,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 
 
-	Map<String, ArrayList<String>> getQuestionMap(String survey_id)
+	public Map<String, ArrayList<String>> getQuestionMap(String survey_id)
 	{
 		Map<String, ArrayList<String>> map = new HashMap<String, ArrayList<String>>();
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -191,7 +188,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		return map;
 	}
 
-	Boolean hasQs(String survey_id, String subId)
+	public Boolean hasQs(String survey_id, String subId)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
 		String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE " + KEY_SURVEY + " = " + 
@@ -206,7 +203,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		else return false;
 	}
 
-	ArrayList<ArrayList<String>> getCompletedSurveys()
+	public ArrayList<ArrayList<String>> getCompletedSurveys()
 	{
 		ArrayList<ArrayList<String>> surveys = new ArrayList<ArrayList<String>>();
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -235,7 +232,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 	}
 
-	ArrayList<String> getSurvey(String pk)
+	public ArrayList<String> getSurvey(String pk)
 	{
 		ArrayList<String> survey = new ArrayList<String>();
 		SQLiteDatabase db = this.getWritableDatabase();
@@ -262,13 +259,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 
 
-	void setValue(String id, String value, int subId, String survey)
+	public void setValue(String id, String value, int subId, String survey)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
 		String qid = id;
 		String answer = value;
 		ContentValues cv = new ContentValues();
-		//Log.i("Log",  "Setting value - " + value + " to QuestionId - " +qid);
 		if(answer != null)
 		{
 			cv.put(KEY_FACT, answer);
@@ -280,7 +276,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		db.close();
 	}
 
-	String getValue(String id, int subId, String survey)
+	public String getValue(String id, int subId, String survey)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
 		String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE " + KEY_QID + 

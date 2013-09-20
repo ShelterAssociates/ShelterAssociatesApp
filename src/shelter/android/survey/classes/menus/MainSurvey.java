@@ -1,5 +1,7 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.menus;
 
+import shelter.android.survey.classes.forms.*;
+import shelter.android.survey.classes.widgets.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -225,7 +227,6 @@ public class MainSurvey extends SurveyFormActivity
 
 		case OPTION_SAVEDRAFT:
 			saveAsDraft(db, key);
-			resetErrors();
 			Toast.makeText(getApplicationContext(), "Draft Save Success!" , Toast.LENGTH_SHORT).show();
 			break;
 

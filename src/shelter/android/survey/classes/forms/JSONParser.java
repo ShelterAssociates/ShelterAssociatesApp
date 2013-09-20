@@ -1,4 +1,4 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.forms;
 
 import java.io.BufferedReader;
 import java.io.IOException;

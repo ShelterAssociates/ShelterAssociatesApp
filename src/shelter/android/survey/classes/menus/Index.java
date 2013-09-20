@@ -1,4 +1,4 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.menus;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,6 +14,8 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+
+import shelter.android.survey.classes.R;
 
 import android.app.Activity;
 import android.app.AlertDialog;

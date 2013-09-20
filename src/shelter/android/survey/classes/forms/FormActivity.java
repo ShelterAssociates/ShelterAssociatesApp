@@ -1,4 +1,5 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.forms;
+import shelter.android.survey.classes.widgets.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,14 +13,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import shelter.android.survey.classes.widgets.FormCheckBox;
+import shelter.android.survey.classes.widgets.FormEditText;
+import shelter.android.survey.classes.widgets.FormMultiCheckBox;
+import shelter.android.survey.classes.widgets.FormNumericEditText;
+import shelter.android.survey.classes.widgets.OrderedSpinner;
 import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.Toast;
+import android.widget.ScrollView;
+import shelter.*;
 
 /**
  * 
@@ -230,13 +236,13 @@ public abstract class FormActivity extends Activity
 		_viewport.scrollTo(0, y);
 	}
 
-	String get(int widget_id)
+	public String get(int widget_id)
 	{
 		return _widgets.get(widget_id).getValue();		
 	}
 
 
-	String getName(int widget_id)
+	public String getName(int widget_id)
 	{
 		return _widgets.get(widget_id).getStringValue();
 	}
@@ -296,7 +302,7 @@ public abstract class FormActivity extends Activity
 	/**
 	 * simple callbacks for widgets to use when their values have changed
 	 */
-	class FormWidgetToggleHandler
+	public class FormWidgetToggleHandler
 	{
 		public void toggle( FormWidget widget ) {
 			updateToggles( widget );

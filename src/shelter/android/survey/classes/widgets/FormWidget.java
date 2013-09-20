@@ -1,17 +1,18 @@
-package shelter.android.survey.classes;
-
+package shelter.android.survey.classes.widgets;
+import shelter.android.survey.classes.forms.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
 import org.json.JSONObject;
 
+
 import android.content.Context;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
-abstract class FormWidget 
+public class FormWidget 
 {
 	protected View 			_view;
 	protected String 		_property;

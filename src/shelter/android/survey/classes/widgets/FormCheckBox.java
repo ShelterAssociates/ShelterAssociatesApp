@@ -1,5 +1,6 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.widgets;
 
+import shelter.android.survey.classes.forms.*;
 import android.content.Context;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;

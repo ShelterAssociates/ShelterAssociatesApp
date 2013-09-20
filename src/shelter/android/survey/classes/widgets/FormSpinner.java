@@ -1,4 +1,5 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.widgets;
+import shelter.android.survey.classes.forms.*;
 
 import java.util.ArrayList;
 import java.util.Collections;

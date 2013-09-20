@@ -1,4 +1,6 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.menus;
+import shelter.android.survey.classes.forms.*;
+import shelter.android.survey.classes.widgets.*;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.FileInputStream;

@@ -1,5 +1,7 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.forms;
 
+import shelter.android.survey.classes.menus.*;
+import shelter.android.survey.classes.widgets.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +42,7 @@ public abstract class SurveyFormActivity extends FormActivity
 	Button bt, bt2;
 	Boolean button = false;
 	Boolean partOfSub = false;
-	DatabaseHandler db = new DatabaseHandler(this);
+	public DatabaseHandler db = new DatabaseHandler(this);
 	ArrayList<String> subSects = new ArrayList<String>();
 
 	// -----------------------------------------------
@@ -364,7 +366,6 @@ public abstract class SurveyFormActivity extends FormActivity
 			for( int i = 0; i< _widgets.size(); i++) 
 			{
 				widget = _widgets.get(i);
-				Log.i("Log", "Getting value, Qid : " +  widget.getId() + " SubsectionId : " + widget.getSub());
 				widget.setValue(db.getValue(widget.getId(), widget.getSub(), survey));
 			}
 		}
@@ -393,7 +394,7 @@ public abstract class SurveyFormActivity extends FormActivity
 
 
 
-	Boolean save(DatabaseHandler db, String surveyId, String survey)
+	protected Boolean save(DatabaseHandler db, String surveyId, String survey)
 	{
 		Map<String, String> jsonRequired = new HashMap<String, String>();
 		Map<String, String> jsonNotRequired = new HashMap<String, String>();
@@ -634,7 +635,7 @@ public abstract class SurveyFormActivity extends FormActivity
 	 * 
 	 */
 
-	void saveAsDraft(DatabaseHandler db, String survey)
+	public void saveAsDraft(DatabaseHandler db, String survey)
 	{
 		FormWidget widget = _widgets.get(0);
 		this.db = db;

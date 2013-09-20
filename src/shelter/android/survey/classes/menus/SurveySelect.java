@@ -1,5 +1,5 @@
-package shelter.android.survey.classes;
-
+package shelter.android.survey.classes.menus;
+import shelter.android.survey.classes.forms.*;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import org.json.JSONException;

@@ -1,4 +1,5 @@
-package shelter.android.survey.classes;
+package shelter.android.survey.classes.widgets;
+import shelter.android.survey.classes.forms.*;
 
 import shelter.android.survey.classes.R;
 import android.content.Context;
