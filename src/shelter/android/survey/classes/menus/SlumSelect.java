@@ -69,7 +69,7 @@ public class SlumSelect extends FormActivity
 		try {
 			file = openFileInput("all_surveys.json");
 			String jsonString = FormActivity.parseFileToString( file );
-			JSONObject obj = JSONParser.getJSONFromString(jsonString);
+			JSONObject obj = new JSONObject(jsonString);
 			JSONObject survey = obj.getJSONObject(surveyId);
         	JSONObject meta = survey.getJSONObject(SCHEMA_KEY_META);
         	JSONObject slums = meta.getJSONObject("slums"); 

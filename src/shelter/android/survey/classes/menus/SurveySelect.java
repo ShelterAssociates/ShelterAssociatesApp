@@ -38,7 +38,7 @@ public class SurveySelect extends FormActivity
 		try {
 			FileInputStream file = openFileInput("all_surveys.json");
 	        String jsonString = FormActivity.parseFileToString( file );
-	        JSONObject obj = JSONParser.getJSONFromString(jsonString);
+	        JSONObject obj = new JSONObject(jsonString);
         	JSONObject surveys = obj.getJSONObject(SCHEMA_KEY_SURVEYS);
         	LinearLayout layout = generateForm("{ \"Select a Survey\" : " + surveys.toString() + " }");
     		TextView spacer = new TextView(this);

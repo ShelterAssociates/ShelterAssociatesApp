@@ -63,7 +63,7 @@ public class UploadExisting extends FormActivity {
         	Toast.makeText(getApplicationContext(), "No surveys to upload!" , Toast.LENGTH_LONG).show();
         	return;
          }
-        JSONObject obj = JSONParser.getJSONFromString(inputJsonString);
+        
 		String template = FormActivity.parseAssetToString(this, "completed_slums_template.json" );
 		JSONObject outputJson = new JSONObject();
 		String pk = new String();
@@ -72,6 +72,7 @@ public class UploadExisting extends FormActivity {
 		String householdCode = new String();
 		String surveyDescription = new String();
 		try {
+			JSONObject obj = new JSONObject(inputJsonString);
         	JSONObject slums = obj.getJSONObject("slums");
         	JSONObject surveys = obj.getJSONObject("surveys");
         	surveys = surveys.getJSONObject("choices");

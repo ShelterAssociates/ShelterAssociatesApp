@@ -89,7 +89,6 @@ public class MainSurvey extends SurveyFormActivity
 		setTitle(slumName + " - " + section);
 		setContentView(R.layout.main);
 		String json_data = parseDownloadToString( "all_surveys.json" );
-		obj = JSONParser.getJSONFromString( json_data );
 		key = init(slum, survey, householdId);
 		
 		
@@ -101,6 +100,7 @@ public class MainSurvey extends SurveyFormActivity
 		
 		
 		try {
+			obj = new JSONObject( json_data );
 			json_survey = obj.getJSONObject(survey);
 			String[] params = {json_survey.toString(), slum, slumName, section, key, survey, householdId} ;
 			LinearLayout layout = generateForm(params, db, subSections);
