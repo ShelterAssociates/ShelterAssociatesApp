@@ -36,10 +36,12 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,6 +54,7 @@ public class UploadExisting extends FormActivity {
 
 		// Phase 1 - Generate the multi-checkboxes of completed surveys
 		final DatabaseHandler db = new DatabaseHandler(this);
+		ScrollView sv = new ScrollView(this);
 		// Get a list of length-2 arrays:
 		// [0] = slum ID
 		// [1] = slum name (needs to be looked up from input JSON)
@@ -78,6 +81,7 @@ public class UploadExisting extends FormActivity {
 			surveys = surveys.getJSONObject("choices");
 			for (int i = 0; i < complete.size(); i++)
 			{
+				Log.i("Log", "Getting complete surveys " + i);
 				pk = complete.get(i).get(0);
 				surveyName = surveys.getString(complete.get(i).get(1));
 				slumName = slums.getString(complete.get(i).get(2));
@@ -108,7 +112,6 @@ public class UploadExisting extends FormActivity {
 
 		final EditText password = new EditText(this);
 		password.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-
 		layout.addView(text2);
 		layout.addView(usernameLabel);
 		layout.addView(username);
@@ -278,7 +281,8 @@ public class UploadExisting extends FormActivity {
 		layout.addView(bt);
 
 		// Now render it all
-		setContentView(layout);
+		sv.addView(layout);
+		setContentView(sv);
 	}
 
 	@Override
