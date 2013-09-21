@@ -112,8 +112,6 @@ public class Index extends Activity {
 						fos.close();
 						https.disconnect();
 						Toast.makeText(getCurrentContext(), "Download successful." , Toast.LENGTH_LONG).show();
-						Intent intent = new Intent(getApplicationContext(), Index.class);
-						startActivity(intent);
 					}
 					catch(Exception e)
 					{
