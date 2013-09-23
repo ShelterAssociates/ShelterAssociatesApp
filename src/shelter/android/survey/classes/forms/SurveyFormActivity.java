@@ -84,6 +84,7 @@ public abstract class SurveyFormActivity extends FormActivity
 				JSONObject section_1 = sections.getJSONObject(0);
 				sectionName = section_1.getString("name");
 			}
+			
 			JSONObject section = new JSONObject();
 			JSONObject temp;
 			JSONArray questions = new JSONArray();
@@ -176,7 +177,7 @@ public abstract class SurveyFormActivity extends FormActivity
 				}
 				final ArrayList<String> subSects2 = subSects;
 
-				final String finalName = sectionName;
+				final String finalName = section.getString("name");
 
 				//final int sectionNo = Integer.valueOf(section.getString("id"));
 				name = section.getString("name");

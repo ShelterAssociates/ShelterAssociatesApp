@@ -17,7 +17,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "Survey";
 	public static final String TABLE_FACTS = "facts";
 	public static final String TABLE_SURVEYS = "surveys";
-//
+	
 	public static final String KEY_PK = "pk";
 	public static final String KEY_QID = "qid";
 	public static final String KEY_FACT = "fact";

@@ -90,16 +90,17 @@ public class MainSurvey extends SurveyFormActivity
 		 *
 		 */
 		
-		if(section.equals(""))
-		{
-			subSections = getSubSections();
-		}
+
 		
 		
 		
 		try {
 			obj = new JSONObject( json_data );
 			json_survey = obj.getJSONObject(survey);
+			if(section.equals(""))
+			{
+				subSections = getSubSections();
+			}
 			String[] params = {json_survey.toString(), slum, slumName, section, key, survey, householdId} ;
 			LinearLayout layout = generateForm(params, db, subSections);
 			mContentFrame = (FrameLayout)findViewById(R.id.content_frame);
@@ -209,7 +210,7 @@ public class MainSurvey extends SurveyFormActivity
 		}
 		catch(JSONException e)
 		{
-			
+			e.toString();
 		}
 		}
 		
