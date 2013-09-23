@@ -60,12 +60,13 @@ public class OrderedSpinner extends FormWidget
 		_order = new ArrayList<String>();
 		
 		_orderMap = new HashMap<String, String>();
+		_orderMap.put(" Make a Selection", "0");
+		_slumOrdered.add(" Make a Selection");
 		
-
 		for (int i = 0; i < propertyNames.length(); i++)
 		{
 			try {
-				_orderMap.put(options.getString(propertyNames.getString(i)),propertyNames.getString(i));
+				_orderMap.put(options.getString(propertyNames.getString(i)) ,propertyNames.getString(i));
 				_slumOrdered.add( options.getString(propertyNames.getString(i)));
 			} 
 			catch (JSONException e) 
@@ -74,7 +75,6 @@ public class OrderedSpinner extends FormWidget
 			}
 		}
 
-		//Collections.sort(_order);
 		Collections.sort(_slumOrdered);
 		_propmap = new HashMap<String, String>();
 		_adapter = new ArrayAdapter<String>( context, R.layout.spinner_item );
@@ -83,7 +83,7 @@ public class OrderedSpinner extends FormWidget
 		_spinner.setSelection( 0 );
 		
 
-			for( int i = 0; i < options.length(); i++ ) 
+			for( int i = 0; i < options.length()+1; i++ ) 
 			{
 				name =  _slumOrdered.get(i);
 				p = _orderMap.get( name );
@@ -113,8 +113,6 @@ public class OrderedSpinner extends FormWidget
 	// -----------------------------------------------
 
 	public String getValue() {
-
-		Log.i("Log", "Spinner value " + _spinner.getSelectedItemPosition());
 		
 		if(_propmap.get( _adapter.getItem( _spinner.getSelectedItemPosition() ) ).equals("0"))
 		{

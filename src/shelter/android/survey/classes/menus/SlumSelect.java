@@ -35,7 +35,7 @@ public class SlumSelect extends FormActivity
 			@Override
 			public void onClick(View v) {
 				
-				if(getName(0).equals("Make a Selection"))
+				if(getName(0).equals(" Make a Selection"))
 				{
 					Toast.makeText(getApplicationContext(), "Please select a slum!" , Toast.LENGTH_SHORT).show();
 

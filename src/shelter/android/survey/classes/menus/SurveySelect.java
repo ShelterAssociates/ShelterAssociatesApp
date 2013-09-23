@@ -13,6 +13,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 
 public class SurveySelect extends FormActivity 
@@ -28,10 +29,17 @@ public class SurveySelect extends FormActivity
 		bt.setOnClickListener(new OnClickListener() {           
 			@Override
 			public void onClick(View v) {
+				if(getName(0).equals(" Make a Selection"))
+				{
+					Toast.makeText(getApplicationContext(), "Please select a survey!" , Toast.LENGTH_SHORT).show();
+					
+				}
+				else{
 				Intent intent = new Intent(v.getContext(), SlumSelect.class);
 				intent.putExtra("surveyName", getName(0));
 				intent.putExtra("surveyId", get(0));
 			    startActivity(intent);
+				}
 			}
 		});
 		// Parse JSON
