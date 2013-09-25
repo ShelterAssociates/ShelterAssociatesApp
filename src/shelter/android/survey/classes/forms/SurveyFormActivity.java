@@ -2,12 +2,23 @@ package shelter.android.survey.classes.forms;
 
 import shelter.android.survey.classes.menus.*;
 import shelter.android.survey.classes.widgets.*;
+import shelter.android.survey.classes.menus.Index;
+
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -360,7 +371,7 @@ public abstract class SurveyFormActivity extends FormActivity
 	 * is used as a key, and fills the form with previously saved answers from
 	 * the database if they are available.
 	 */
-	protected void populate( DatabaseHandler db, String survey )
+	protected void populate( DatabaseHandler db, String key )
 	{
 		try
 		{
@@ -368,7 +379,7 @@ public abstract class SurveyFormActivity extends FormActivity
 			for( int i = 0; i< _widgets.size(); i++) 
 			{
 				widget = _widgets.get(i);
-				widget.setValue(db.getValue(widget.getId(), widget.getSub(), survey));
+				widget.setValue(db.getValue(widget.getId(), widget.getSub(), key));
 			}
 		}
 		catch (IndexOutOfBoundsException e)
@@ -645,15 +656,7 @@ public abstract class SurveyFormActivity extends FormActivity
 		for( int i = 0; i < _widgets.size(); i++)
 		{
 			widget = _widgets.get(i);
-			if(!db.isInDb(widget.getId(), widget.getSub(), survey))
-			{
-				db.addQuestion(widget.getId(), widget.getValue(), widget.getSub(), survey);
-			}
-
-			else if (db.isInDb(widget.getId(), widget.getSub(), survey) && !widget.getValue().equals(""))
-			{
-				db.setValue(widget.getId(), widget.getValue(), widget.getSub(), survey);
-			}
+			db.createOrUpdateFact(widget.getId(), widget.getValue(), widget.getSub(), survey);
 		}
 		db.setComplete(survey, 0);
 	}
@@ -701,4 +704,5 @@ public abstract class SurveyFormActivity extends FormActivity
 		}
 		return null;
 	}
+	
 }

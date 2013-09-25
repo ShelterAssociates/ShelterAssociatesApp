@@ -74,7 +74,7 @@ public class OrderedSpinner extends FormWidget
 				e.printStackTrace();
 			}
 		}
-
+		
 		Collections.sort(_slumOrdered);
 		_propmap = new HashMap<String, String>();
 		_adapter = new ArrayAdapter<String>( context, R.layout.spinner_item );

@@ -56,7 +56,7 @@ public class Index extends Activity {
 		startActivity(intent);
 	}
 
-	private boolean isNetworkAvailable() {
+	public boolean isNetworkAvailable() {
 		ConnectivityManager connectivityManager 
 		= (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 		NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();

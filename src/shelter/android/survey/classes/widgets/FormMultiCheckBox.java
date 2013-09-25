@@ -172,7 +172,6 @@ public class FormMultiCheckBox extends FormWidget{
 		if (value != null)
 		{
 			String[] array = value.trim().split("[^0-9]+");
-
 			for(int i = 0; i < array.length; i++)
 			{				
 				for (int j = 0; j<_boxes.size();j++)

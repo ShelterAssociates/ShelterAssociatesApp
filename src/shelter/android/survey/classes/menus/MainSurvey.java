@@ -1,12 +1,26 @@
 package shelter.android.survey.classes.menus;
 
 import shelter.android.survey.classes.forms.*;
+import shelter.android.survey.classes.menus.Index;
 import shelter.android.survey.classes.widgets.*;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
+import java.net.URL;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Map;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
 import shelter.android.survey.classes.R;
 
 import org.json.JSONArray;
@@ -14,10 +28,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -246,6 +264,8 @@ public class MainSurvey extends SurveyFormActivity
 
 		case OPTION_LOAD:
 			populate(db, key);
+			Log.i("Log", survey + " " + slum + " " + householdId);
+			getFactsForSurvey(survey, slum, householdId);
 			break;
 
 		case OPTION_SAVEDRAFT:
@@ -297,5 +317,115 @@ public class MainSurvey extends SurveyFormActivity
 			Log.i("Log", "IOException: " + e.getMessage() );
 		}
 		return null;
+	}
+	
+	public void getFactsForSurvey(final String surveyId, final String slumId, final String householdId)
+	{
+		final String surveyIdNoSuffix = surveyId.substring(0, surveyId.length()-1);
+		if (isNetworkAvailable()==true)
+		{
+			Thread t  = new Thread()
+			{
+				public void run()
+				{
+					try{
+						Looper.prepare();
+						URL url = new URL("https://survey.shelter-associates.org/android/get_survey/" + surveyIdNoSuffix + "/" 
+						+ slumId + "/" + householdId+"/");
+						// Ignore unverified certificate
+						trustAllHosts();
+						HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+						https.setHostnameVerifier(DO_NOT_VERIFY);
+						InputStream is = (InputStream) https.getContent();
+						String jsonData = convertStreamToString(is);
+						int httpResponseCode = https.getResponseCode();
+						if(httpResponseCode == 200)
+						{
+							JSONArray facts = new JSONArray(jsonData);
+							for(int i = 0; i<facts.length(); i++)
+							{					
+								JSONObject fact = facts.getJSONObject(i);
+								db.createOrUpdateFact(
+										fact.getString("code"), 
+										fact.getString("data"), 
+										fact.getInt("sub_code"),
+										key);
+								
+							}
+							
+							Toast.makeText(getBaseContext(), "Download successful." , Toast.LENGTH_LONG).show();
+							Intent intent = new Intent(getBaseContext(), MainSurvey.class);
+							intent.putExtra("slum", slum); // slum should be the chosen spinner value
+							intent.putExtra("slumName", slumName);
+							intent.putExtra("surveyId", surveyId);
+							intent.putExtra("section", "");
+							intent.putExtra("householdId", householdId);
+							startActivity(intent);
+						}
+						
+						else if(httpResponseCode == 500)
+						{
+							Toast.makeText(getBaseContext(), "This survey wasn't found on the server." , Toast.LENGTH_LONG).show();
+						}
+						https.disconnect();
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					}
+					Looper.loop();
+				}
+			};
+
+			t.start();
+		}
+		else
+		{
+			Toast.makeText(getBaseContext(), "Something went wrong." , Toast.LENGTH_LONG).show();
+		}
+	}
+	static String convertStreamToString(java.io.InputStream is) {
+	    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+	    return s.hasNext() ? s.next() : "";
+	}
+	
+	// always verify the host - don't check for certificate
+	final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
+		public boolean verify(String hostname, SSLSession session) {
+			return true;
+		}
+	};
+
+	/**
+	 * Trust every server - don't check for any certificate
+	 */
+	private static void trustAllHosts() {
+		// Create a trust manager that does not validate certificate chains
+		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
+			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+				return new java.security.cert.X509Certificate[] {};
+			}
+
+			public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+
+			public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
+
+		} };
+
+		// Install the all-trusting trust manager
+		try {
+			SSLContext sc = SSLContext.getInstance("TLS");
+			sc.init(null, trustAllCerts, new java.security.SecureRandom());
+			HttpsURLConnection
+			.setDefaultSSLSocketFactory(sc.getSocketFactory());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	public boolean isNetworkAvailable() {
+		ConnectivityManager connectivityManager 
+		= (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
 	}
 }

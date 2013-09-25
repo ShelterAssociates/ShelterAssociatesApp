@@ -135,7 +135,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	}
 
 
-	public void addQuestion(String qid, String answer, int subId, String key)
+	public void addFact(String qid, String answer, int subId, String key)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
 		ContentValues values = new ContentValues();
@@ -147,6 +147,19 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		db.close();
 	}
 
+	public void createOrUpdateFact(String qid, String answer, int subId, String key)
+	{
+		if(!isInDb(qid, subId, key))
+		{
+			addFact(qid, answer, subId, key);
+		}
+
+		else if (isInDb(qid, subId, key) && !answer.equals(""))
+		{
+			setValue(qid, answer, subId, key);
+		}
+	}
+	
 	public ArrayList<List<String>> getQuestions(String surveyForeignKey)
 	{
 		ArrayList<List<String>> questions = new ArrayList<List<String>>();
