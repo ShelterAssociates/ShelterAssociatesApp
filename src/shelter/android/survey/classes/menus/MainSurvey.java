@@ -264,8 +264,8 @@ public class MainSurvey extends SurveyFormActivity
 
 		case OPTION_LOAD:
 			populate(db, key);
-			Log.i("Log", survey + " " + slum + " " + householdId);
 			getFactsForSurvey(survey, slum, householdId);
+			Log.i("Log", "Loading..");
 			break;
 
 		case OPTION_SAVEDRAFT:
@@ -363,7 +363,7 @@ public class MainSurvey extends SurveyFormActivity
 							startActivity(intent);
 						}
 						
-						else if(httpResponseCode == 500)
+						else if(httpResponseCode == 500 || httpResponseCode == 404 )
 						{
 							Toast.makeText(getBaseContext(), "This survey wasn't found on the server." , Toast.LENGTH_LONG).show();
 						}
@@ -389,43 +389,6 @@ public class MainSurvey extends SurveyFormActivity
 	    return s.hasNext() ? s.next() : "";
 	}
 	
-	// always verify the host - don't check for certificate
-	final static HostnameVerifier DO_NOT_VERIFY = new HostnameVerifier() {
-		public boolean verify(String hostname, SSLSession session) {
-			return true;
-		}
-	};
+	
 
-	/**
-	 * Trust every server - don't check for any certificate
-	 */
-	private static void trustAllHosts() {
-		// Create a trust manager that does not validate certificate chains
-		TrustManager[] trustAllCerts = new TrustManager[] { new X509TrustManager() {
-			public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-				return new java.security.cert.X509Certificate[] {};
-			}
-
-			public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-
-			public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {}
-
-		} };
-
-		// Install the all-trusting trust manager
-		try {
-			SSLContext sc = SSLContext.getInstance("TLS");
-			sc.init(null, trustAllCerts, new java.security.SecureRandom());
-			HttpsURLConnection
-			.setDefaultSSLSocketFactory(sc.getSocketFactory());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	public boolean isNetworkAvailable() {
-		ConnectivityManager connectivityManager 
-		= (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
-		return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-	}
 }

@@ -1,4 +1,5 @@
 package shelter.android.survey.classes.forms;
+import shelter.android.survey.classes.utils.*;
 import shelter.android.survey.classes.widgets.*;
 
 import java.io.IOException;
@@ -40,7 +41,7 @@ import shelter.*;
  * with an SQLite database and features a sidebar to assist navigation between sections.
  * 
  */
-public abstract class FormActivity extends Activity
+public abstract class FormActivity extends InternetUtils
 {
 	/**
 	 * Initializing all constants that will be needed for JSON object types, 
