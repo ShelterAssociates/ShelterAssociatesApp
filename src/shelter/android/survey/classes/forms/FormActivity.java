@@ -21,9 +21,15 @@ import shelter.android.survey.classes.widgets.FormNumericEditText;
 import shelter.android.survey.classes.widgets.OrderedSpinner;
 import android.app.Activity;
 import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ScrollView;
 import shelter.*;
@@ -68,8 +74,10 @@ public abstract class FormActivity extends InternetUtils
 	public static String SCHEMA_KEY_SURVEYS		= "surveys";	
 	public static String SCHEMA_KEY_HINT		= "hint";
 	public static String SCHEMA_KEY_ID          = "id";
+	public static String PHOTO_FOLDER 			= "ShelterPhotos";
+	public static String PHOTO_PATH				= Environment.getExternalStorageDirectory().getAbsolutePath();
 	public static final LayoutParams defaultLayoutParams = new LinearLayout.LayoutParams( LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
-
+    public static String m_id = "";
 	// -- data
 	protected Map<String, FormWidget> _map;
 	protected ArrayList<FormWidget> _widgets;
@@ -78,7 +86,7 @@ public abstract class FormActivity extends InternetUtils
 	protected LinearLayout _container;
 	protected LinearLayout _layout;
 	protected ScrollView   _viewport;
-
+	
 	// -----------------------------------------------
 	//
 	// parse data and build view
@@ -102,7 +110,6 @@ public abstract class FormActivity extends InternetUtils
 			JSONObject property;
 			JSONObject schema = new JSONObject( data ); 
 			JSONArray names = schema.names();
-
 			for( int i= 0; i < names.length(); i++ ) 
 			{
 				name = names.getString( i );
@@ -343,17 +350,21 @@ public abstract class FormActivity extends InternetUtils
 		{
 			String type = property.getString( FormActivity.SCHEMA_KEY_TYPE );
 			String id = property.getString(FormActivity.SCHEMA_KEY_ID);
-
+			Boolean bTakePhoto = false;
+			if (property.has("takePhoto"))
+			{
+				bTakePhoto = property.getBoolean("takePhoto");
+			}
 			if( type.equals( FormActivity.SCHEMA_KEY_STRING) ){
-				return new FormEditText( this, name, id , type );
+				return new FormEditText( this, name, id , type, bTakePhoto );
 			}
 
 			if( type.equals( FormActivity.SCHEMA_KEY_BOOL ) ){
-				return new FormCheckBox( this, name, id, type );
+				return new FormCheckBox( this, name, id, type, bTakePhoto );
 			}
 
 			if( type.equals( FormActivity.SCHEMA_KEY_INT) ){
-				return new FormNumericEditText( this, name, id, type );
+				return new FormNumericEditText( this, name, id, type, bTakePhoto );
 			}
 
 
@@ -362,7 +373,7 @@ public abstract class FormActivity extends InternetUtils
 				if (property.has(FormActivity.SCHEMA_KEY_OPTIONS ) )
 				{
 					JSONObject options = property.getJSONObject( FormActivity.SCHEMA_KEY_OPTIONS );
-					return new FormMultiCheckBox( this, name, options, id, type ) ;
+					return new FormMultiCheckBox( this, name, options, id, type, bTakePhoto ) ;
 				}
 			}
 
@@ -371,7 +382,7 @@ public abstract class FormActivity extends InternetUtils
 				if( property.has( FormActivity.SCHEMA_KEY_OPTIONS ) ) 
 				{
 					JSONObject options = property.getJSONObject( FormActivity.SCHEMA_KEY_OPTIONS );
-					return new OrderedSpinner(  this, name, options, id, type );
+					return new OrderedSpinner(  this, name, options, id, type, bTakePhoto );
 				}
 			}
 		} catch( JSONException e ) {
@@ -410,7 +421,6 @@ public abstract class FormActivity extends InternetUtils
 		}
 		return null;
 	}
-	
 }
 
 
