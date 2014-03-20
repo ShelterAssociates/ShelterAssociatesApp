@@ -40,7 +40,7 @@ public class OrderedSpinner extends FormWidget
 	 * SelectSlum more user-friendly.
 	*/
 
-	public OrderedSpinner( Context context, String property, JSONObject options, String id, String type ) 
+	public OrderedSpinner( Context context, String property, JSONObject options, String id, String type, Boolean bTakePhoto ) 
 	{
 		super( context, property );
 
@@ -94,6 +94,9 @@ public class OrderedSpinner extends FormWidget
 		_layout.addView( _label );
 		_layout.addView( _spinner );
 		_spinner.setSelection(0);
+		
+		//Added by SC : to add take photo button if applicable
+		AddPhotoLayout(context, bTakePhoto);
 	}
 
 	public String getType()

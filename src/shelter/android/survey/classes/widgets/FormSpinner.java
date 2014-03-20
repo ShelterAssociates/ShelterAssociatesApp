@@ -46,7 +46,7 @@ public class FormSpinner extends FormWidget
 	//
 	// -----------------------------------------------
 
-	public FormSpinner( Context context, String property, JSONObject options, String id, String type ) 
+	public FormSpinner( Context context, String property, JSONObject options, String id, String type , Boolean bTakePhoto) 
 	{
 		super( context, property );
 
@@ -102,6 +102,9 @@ public class FormSpinner extends FormWidget
 
 		_layout.addView( _label );
 		_layout.addView( _spinner );
+		
+		//Added by SC : to add take photo button if applicable
+		AddPhotoLayout(context, bTakePhoto);
 	}
 
 	public String getType()

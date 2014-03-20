@@ -1,6 +1,6 @@
 package shelter.android.survey.classes.widgets;
-import shelter.android.survey.classes.forms.*;
 
+import shelter.android.survey.classes.forms.*;
 import shelter.android.survey.classes.R;
 import android.content.Context;
 import android.graphics.Paint.Style;
@@ -16,8 +16,8 @@ public class FormEditText extends FormWidget
 	protected EditText _input;
 	protected String   _id;
 	protected String   _type;
-	
-	public FormEditText( Context context, String property, String id, String type)
+
+	public FormEditText( final Context context, String property, String id, String type, Boolean bTakePhoto)
 	{
 		super( context, property );
 		
@@ -33,13 +33,12 @@ public class FormEditText extends FormWidget
 		_input.setLayoutParams( FormActivity.defaultLayoutParams );
 		_input.setImeOptions( EditorInfo.IME_ACTION_DONE );
 		_input.setTextAppearance(context, R.style.CustomTextStyle);
-		
 		_layout.addView( _label );
 		_layout.addView( _input );
 		
+		//Added by SC : to add take photo button if applicable
+		AddPhotoLayout(context, bTakePhoto);
 	}
-	
-	
 	
 	@Override
 	public String getValue(){

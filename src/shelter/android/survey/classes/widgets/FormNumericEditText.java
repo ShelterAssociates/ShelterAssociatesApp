@@ -16,7 +16,7 @@ public class FormNumericEditText extends FormWidget
 	protected String _id;
 	protected String _type;
 		
-	public FormNumericEditText(Context context, String property, String id, String type) 
+	public FormNumericEditText(Context context, String property, String id, String type, Boolean bTakePhoto) 
 	{
 		super( context, property );
 		
@@ -34,6 +34,9 @@ public class FormNumericEditText extends FormWidget
 		
 		_layout.addView( _label );
 		_layout.addView( _input );
+		
+		//Added by SC : to add take photo button if applicable
+		AddPhotoLayout(context, bTakePhoto);
 	}
 
 	
