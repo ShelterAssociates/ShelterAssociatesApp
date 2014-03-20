@@ -1,14 +1,19 @@
 package shelter.android.survey.classes.menus;
 
+import java.io.File;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import shelter.android.survey.classes.forms.FormActivity;
+import android.R.string;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.*;
+import android.text.TextUtils;
 import android.util.Log;
 
 public class DatabaseHandler extends SQLiteOpenHelper {
@@ -17,9 +22,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public static final String DATABASE_NAME = "Survey";
 	public static final String TABLE_FACTS = "facts";
 	public static final String TABLE_SURVEYS = "surveys";
+	public static final String TABLE_IMAGES = "images";
 	
 	public static final String KEY_PK = "pk";
 	public static final String KEY_QID = "qid";
+	public static final String KEY_FK_FACTS = "facts_fk";
 	public static final String KEY_FACT = "fact";
 	public static final String KEY_SURVEY = "survey";
 	public static final String KEY_COMPLETE = "complete";
@@ -28,6 +35,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public static final String KEY_SURVEYID = "surveyid";
 	public static final String KEY_HOUSEHOLD = "household";
 	public static final String KEY_SLUMID = "slumid";
+	
+	public static final String KEY_LAT = "lattitude";
+	public static final String KEY_LONGITUDE = "longitude";
+	public static final String KEY_BITMAP = "bitmap";
 
 
 
@@ -55,6 +66,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 				" FOREIGN KEY ("+KEY_SURVEY+") REFERENCES "+TABLE_SURVEYS+
 				" ("+KEY_PK+"));";
 		db.execSQL(CREATE_FACT_TABLE);
+		//Code added by SC : To insert photo related information.
+		String CREATE_IMAGES_TABLE = "CREATE TABLE " + TABLE_IMAGES
+				+"(" + KEY_PK + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+				KEY_FK_FACTS + " INTEGER," +
+				KEY_LAT + " TEXT," +
+				KEY_BITMAP + " TEXT," +
+				 KEY_LONGITUDE+" TEXT," +
+				" FOREIGN KEY ("+KEY_FK_FACTS+") REFERENCES "+TABLE_FACTS+
+				" ("+KEY_PK+"));";
+		db.execSQL(CREATE_IMAGES_TABLE);
+				
 
 		Log.i("Log", "Database Created!");
 
@@ -149,9 +171,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 	public void createOrUpdateFact(String qid, String answer, int subId, String key)
 	{
+		
 		if(!isInDb(qid, subId, key))
 		{
 			addFact(qid, answer, subId, key);
+			
 		}
 
 		else if (isInDb(qid, subId, key) && !answer.equals(""))
@@ -170,10 +194,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		if (cursor.moveToFirst()) {
 			do {
 				List<String> question = new ArrayList<String>();
+				question.add(cursor.getString(0)); // pk
 				question.add(cursor.getString(1)); // Question ID
 				question.add(cursor.getString(2)); // Fact
 				question.add(cursor.getString(3)); // Survey ID
 				question.add(cursor.getString(4)); // sub_code
+				
 				questions.add(question);
 			} while (cursor.moveToNext());
 		}
@@ -267,6 +293,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public void removeSurvey(String pk)
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
+		String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE "  + KEY_SURVEY +
+				" = '" + pk + "'";
+		Cursor cursor = db.rawQuery(selectQuery, null);
+		String[] array = new String[cursor.getCount()];
+		int i = 0;
+		if(cursor.getCount()>0){
+			while(cursor.moveToNext()){
+				array[i] = cursor.getString(cursor.getColumnIndex(KEY_PK));
+			    i++;
+			}
+			
+			String args = TextUtils.join(", ", array);
+			db.execSQL(String.format("DELETE FROM "+TABLE_IMAGES+" WHERE "+KEY_FK_FACTS+"  IN (%s);", args));
+			deletePhotos();
+		}
 		db.delete(TABLE_SURVEYS, KEY_PK + "=" + pk, null);
 		db.delete(TABLE_FACTS, KEY_SURVEY + "=" + pk, null);
 	}
@@ -274,6 +315,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
 	public void setValue(String id, String value, int subId, String survey)
 	{
+//		Log.in("log",""+);
 		SQLiteDatabase db = this.getWritableDatabase();
 		String qid = id;
 		String answer = value;
@@ -293,8 +335,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	{
 		SQLiteDatabase db = this.getWritableDatabase();
 		String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE " + KEY_QID + 
-				" = " + id + " AND " + KEY_SUBSECTION + " = " + subId + " AND " + KEY_SURVEY +
-				" = '" + survey + "'";
+				" = '" + id + "' AND " + KEY_SUBSECTION + " = " + subId + " AND " + KEY_SURVEY +
+				" = " + survey + ";";
 		Cursor cursor = db.rawQuery(selectQuery, null);
 		if(cursor.moveToFirst())
 		{
@@ -321,11 +363,204 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		qid + "' AND " + KEY_SUBSECTION + " = " + subId + " AND " + KEY_SURVEY + " = '" + key +"'";  ;
 		Cursor cursor = db.rawQuery(selectQuery, null);
 		if (cursor.moveToFirst()) {
+			db.close();
 			return true;
 		}
 		db.close();
 		return false;
 
 	}
+	
+	/**
+	 * Function added by SC :
+	 * Added function to fetch fact id, which is used while inserting photos to table.
+	 * @param qid
+	 * @param subId
+	 * @param key
+	 * @return
+	 */
+	public Integer isInDbFacts(String qid, int subId, String key)
+	{
+		try{
+		SQLiteDatabase db = this.getWritableDatabase();
+		String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE " + KEY_QID + " = '" + 
+							qid + "' AND " + KEY_SUBSECTION + " = " + subId + " AND " + KEY_SURVEY + " = " + key +";"  ;
+		Cursor cursor = db.rawQuery(selectQuery, null);
+		if (cursor.moveToFirst()) {
+			db.close();
+			return cursor.getInt(0);
+		}
+		db.close();
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return null;
 
+	}
+	
+	/**
+	 * Function added by SC:
+	 * Code to save captured photo records to TABLE_IMAGES.
+	 * @param imageList
+	 * @param qid
+	 * @param subId
+	 * @param key
+	 * @return
+	 */
+	public boolean insertImages(ArrayList<List<String>> imageList,String qid, int subId, String key)
+	{
+		try{
+		int fk_id = isInDbFacts(qid,subId,key);
+		//Delete previous photos if any for selected question.
+		deleteImageList(fk_id);
+		if(fk_id > 0)
+		{
+			SQLiteDatabase db = this.getWritableDatabase();
+			//Iterate through all image list and insert to database table
+			for (int i=0; i<imageList.size(); i++)
+			{
+				ContentValues cv = new ContentValues();
+				cv.put(KEY_LAT, imageList.get(i).get(0));
+				cv.put(KEY_FK_FACTS, fk_id);
+				cv.put(KEY_LONGITUDE, imageList.get(i).get(1));
+				cv.put(KEY_BITMAP, imageList.get(i).get(2));
+				db.insert(TABLE_IMAGES,null,cv);
+			}
+			db.close();
+		}
+		else
+		{
+			return false;
+		}
+		Log.i("log","inserted data");
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return true;
+	}
+	
+	/**
+	 * Function added by SC:
+	 * Fetch all the photos to respective fact.
+	 * @param i_factID
+	 * @return ArrayList<List<String>> 
+	 */
+	public ArrayList<List<String>> getImageList(String i_factID)
+	{
+		ArrayList<List<String>> images = new ArrayList<List<String>>();
+		try{	
+			SQLiteDatabase db = this.getWritableDatabase();
+			String selectQuery = "SELECT  * FROM " + TABLE_IMAGES + " WHERE " + KEY_FK_FACTS + " = "+ Integer.parseInt(i_factID) +";";
+			Cursor cursor = db.rawQuery(selectQuery, null);
+			//Iterate and insert to array object
+			if (cursor.moveToFirst()) {
+				do {
+					List<String> image = new ArrayList<String>();
+					image.add(cursor.getString(2)); // Latitude
+					image.add(cursor.getString(4)); // Longitude
+					image.add(cursor.getString(3)); // Bitmap
+					images.add(image);
+				} while (cursor.moveToNext());
+			}
+			db.close();
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return images;
+
+	}
+	
+	/**
+	 * Function added by SC:
+	 * Code to delete photo record.
+	 * @param i_factID
+	 * @return
+	 */
+	public Cursor deleteImageList(Integer i_factID)
+	{
+		try{
+			SQLiteDatabase db = this.getWritableDatabase();
+			db.delete(TABLE_IMAGES, ""+KEY_FK_FACTS+"="+i_factID, null);
+			db.close();
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());	
+		}
+		return null;
+	}
+	
+	/***
+	 * Function added by SC:
+	 * Fetch photo list for the given question id, subsection id and survey
+	 * @param id
+	 * @param subId
+	 * @param survey
+	 * @return
+	 */
+	public ArrayList<List<String>> getImages(String id, int subId, String survey)
+	{
+		int ifactID =0;
+		ArrayList<List<String>> images = new ArrayList<List<String>>();
+		
+		try{
+			SQLiteDatabase db = this.getWritableDatabase();
+			String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE " + KEY_QID + 
+					" = '" + id + "' AND " + KEY_SUBSECTION + " = " + subId + " AND " + KEY_SURVEY +
+					" = " + survey + "";
+			Cursor cursor = db.rawQuery(selectQuery, null);
+			if(cursor.moveToFirst())
+			{
+				ifactID =  cursor.getInt(0);
+			} 
+			db.close();
+			if(ifactID != 0)
+			{
+				images = getImageList(""+ifactID);
+			}
+		}catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return images;
+	}
+	
+	/**
+	 * Function added by SC:
+	 * Function to delete photos from the folder if their records are not present in database table.
+	 */
+	public void deletePhotos()
+	{
+	try{
+		File path = new File(FormActivity.PHOTO_PATH+"/"+FormActivity.PHOTO_FOLDER);
+		
+	    File [] files = path.listFiles();
+	    SQLiteDatabase db = this.getWritableDatabase();
+	    for (int i = 0; i < files.length; i++){
+	        if (files[i].isFile()){ //this line weeds out other directories/folders
+	            String sFileName = files[i].getName();
+	            
+	    		String selectQuery = "SELECT  * FROM " + TABLE_IMAGES + " WHERE " + KEY_BITMAP + " = '"+ sFileName +"';";
+	    		Cursor cursor = db.rawQuery(selectQuery, null);
+	    		if (cursor.getCount()<=0) {
+	    			File objFile = new File(FormActivity.PHOTO_PATH+"/"+FormActivity.PHOTO_FOLDER+"/"+sFileName);
+					if(objFile.exists())
+					{
+						objFile.delete();
+					}
+	    		}
+	    		cursor.close();	
+	        }
+	    }
+	}
+	catch(Exception e){
+		Log.i("Shelter",""+e);
+	}
+	}
 }
