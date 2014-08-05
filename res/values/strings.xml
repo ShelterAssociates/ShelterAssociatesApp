@@ -7,5 +7,6 @@
     <string name="index_upload">Upload Completed Survey</string>
     <string name="index_download">Download All Surveys</string>
     <string name="upload_existing">Upload Selected Surveys</string>
+     <string name="index_onlineMapUpload">Upload Online Map Survey</string>
     
 </resources>
