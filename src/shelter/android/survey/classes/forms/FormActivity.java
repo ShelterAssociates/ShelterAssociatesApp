@@ -58,6 +58,7 @@ public abstract class FormActivity extends InternetUtils
 	 * 
 	 */
 
+	public static String SCHEMA_KEY_MYMAP		= "map";
 	public static String SCHEMA_KEY_TYPE		= "type";
 	public static String SCHEMA_KEY_BOOL 		= "boolean";
 	public static String SCHEMA_KEY_REQUIRED	= "required";
