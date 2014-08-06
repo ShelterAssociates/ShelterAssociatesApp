@@ -1,18 +1,17 @@
 package shelter.android.survey.classes.menus;
 
 import java.io.File;
-import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import shelter.android.survey.classes.forms.FormActivity;
-import android.R.string;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.*;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -23,6 +22,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public static final String TABLE_FACTS = "facts";
 	public static final String TABLE_SURVEYS = "surveys";
 	public static final String TABLE_IMAGES = "images";
+	public static final String TABLE_PLOTTEDSHAPE="plottedShape";
+	public static final String TABLE_PLOTTEDSHAPE_GROUP="plottedShape_group";
+	
 	
 	public static final String KEY_PK = "pk";
 	public static final String KEY_QID = "qid";
@@ -40,7 +42,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	public static final String KEY_LONGITUDE = "longitude";
 	public static final String KEY_BITMAP = "bitmap";
 
-
+	public static final String KEY_DRAWABLE_COMPONENT = "drawablecomponent";
+	public static final String KEY_NAME = "name";
+	public static final String KEY_STATUS = "status";
+	public static final String KEY_CREAT_DATE = "creatdate";
+	public static final String KEY_ORDER = "orders";
+	public static final String KEY_FK_PLOTTEDSHAPE_GROUP = "plottedshapegroup_fk";
+	public static final String KEY_LATLONG = "latlong";
+	public static final String KEY_Code = "codes";
 
 	public DatabaseHandler(Context context)
 	{
@@ -50,14 +59,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	@Override
 	public void onCreate(SQLiteDatabase db)
 	{
-		String CREATE_SURVEYS_TABLE = "CREATE TABLE " + TABLE_SURVEYS
+		String CREATE_SURVEYS_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_SURVEYS
 				+"(" + KEY_PK + " INTEGER PRIMARY KEY AUTOINCREMENT," +
 				KEY_SURVEYID + " TEXT,"+
 				KEY_SLUMID + " INTEGER," +
 				KEY_HOUSEHOLD + " TEXT," +
 				KEY_COMPLETE + " INTEGER " + ")";
 		db.execSQL(CREATE_SURVEYS_TABLE);
-		String CREATE_FACT_TABLE = "CREATE TABLE " + TABLE_FACTS +
+		String CREATE_FACT_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_FACTS +
 				"(" + KEY_PK + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
 				KEY_QID + " STRING, " +
 				KEY_FACT + " STRING, " +
@@ -66,8 +75,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 				" FOREIGN KEY ("+KEY_SURVEY+") REFERENCES "+TABLE_SURVEYS+
 				" ("+KEY_PK+"));";
 		db.execSQL(CREATE_FACT_TABLE);
+		
 		//Code added by SC : To insert photo related information.
-		String CREATE_IMAGES_TABLE = "CREATE TABLE " + TABLE_IMAGES
+		String CREATE_IMAGES_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_IMAGES
 				+"(" + KEY_PK + " INTEGER PRIMARY KEY AUTOINCREMENT," +
 				KEY_FK_FACTS + " INTEGER," +
 				KEY_LAT + " TEXT," +
@@ -77,18 +87,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 				" ("+KEY_PK+"));";
 		db.execSQL(CREATE_IMAGES_TABLE);
 				
-
+			/***************** Sitaram 2014-May-06********/
+		
+		String CREATE_PLOTTEDSHAP_GROUP_TABLE = "CREATE TABLE IF NOT EXISTS " + TABLE_PLOTTEDSHAPE_GROUP
+				+"(" + KEY_PK + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+				KEY_SLUMID + " INTEGER," +
+				KEY_DRAWABLE_COMPONENT + " TEXT," +
+				KEY_NAME + " TEXT," +				
+				KEY_CREAT_DATE + " TEXT," +
+				KEY_LATLONG + " TEXT" +				
+				");";
+				
+		db.execSQL(CREATE_PLOTTEDSHAP_GROUP_TABLE);
+		
 		Log.i("Log", "Database Created!");
 
 	}
 
-//				@Override
-//				public void onOpen(SQLiteDatabase db)
-//				{
-//					db.execSQL("DROP TABLE IF EXISTS " + TABLE_FACTS);
-//					db.execSQL("DROP TABLE IF EXISTS " + TABLE_SURVEYS);
-//					onCreate(db);					
-//				}
+	@Override
+	public void onOpen(SQLiteDatabase db)
+	{
+	//	db.execSQL("DROP TABLE IF EXISTS " + TABLE_FACTS);
+	//	db.execSQL("DROP TABLE IF EXISTS " + TABLE_SURVEYS);
+		onCreate(db);					
+	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
@@ -563,4 +585,219 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		Log.i("Shelter",""+e);
 	}
 	}
+	
+	/*************************************************************************/
+	public void insertPlottedShapeGroup(String slumID, String drawCompo, String name, String createdDate, String latlong)
+	{				
+		try{	
+			SQLiteDatabase db = this.getWritableDatabase();
+			
+			ContentValues cv = new ContentValues();
+			cv.put(KEY_SLUMID,slumID);
+			cv.put(KEY_DRAWABLE_COMPONENT,drawCompo);
+			cv.put(KEY_NAME,name );
+			cv.put(KEY_CREAT_DATE, createdDate);		
+			cv.put(KEY_LATLONG, latlong);		
+			
+			db.insert(TABLE_PLOTTEDSHAPE_GROUP,null,cv);
+		
+			db.close();
+		
+			Log.i("log","inserted data");
+			
+		}catch(Exception e)	{
+			Log.e("Shelter",""+e.getMessage());
+		}
+	
+	}
+	
+	public void updatePlottedShapeGroup(String id, String latlong, String name)
+	{
+//		Log.in("log",""+);
+		SQLiteDatabase db = this.getWritableDatabase();
+		
+		ContentValues cv = new ContentValues(); 
+		if(latlong.length() > 0)
+		{
+			cv.put(KEY_LATLONG, latlong);
+			
+			if(name.length() > 0)
+			{
+				cv.put(KEY_NAME, name);
+			}
+			db.update(TABLE_PLOTTEDSHAPE_GROUP, cv, KEY_PK  + " ='" + id +"'", null);
+		}
+		else
+		{
+			db.delete(TABLE_PLOTTEDSHAPE_GROUP, KEY_PK  + " ='" + id + " '", null);
+		}
+		db.close();
+	}
+		
+	public void deletePlottedShapeGroup(String sulmId)
+	{
+		try
+		{
+		SQLiteDatabase db = this.getWritableDatabase();
+		db.delete(TABLE_PLOTTEDSHAPE_GROUP, KEY_SLUMID  + " ='" + sulmId + " '", null);
+		db.close();
+		Log.i("log","Deleted data");
+		
+		}catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		
+	}
+
+	public ArrayList<List<String>> getAllData(String tblName)
+	{	
+		
+		ArrayList<List<String>> images = new ArrayList<List<String>>();
+		try{	
+			SQLiteDatabase db = this.getWritableDatabase();			
+				
+			//String selectQuery = "SELECT  * FROM " + tblName +" Group by 2 ";  
+			
+			String selectQuery = "SELECT  "+KEY_PK + "," +KEY_SLUMID + "," +KEY_DRAWABLE_COMPONENT + "," +KEY_NAME + "," +KEY_CREAT_DATE+ 
+					
+									" FROM " + TABLE_PLOTTEDSHAPE_GROUP + " Group by "+KEY_SLUMID +" ORDER BY "+KEY_CREAT_DATE;
+			Cursor cursor = db.rawQuery(selectQuery, null);
+			//Iterate and insert to array object
+			if (cursor.moveToFirst()) {
+				do {
+					List<String> image = new ArrayList<String>();
+					image.add(cursor.getString(0));
+					image.add(cursor.getString(1)); 
+					image.add(cursor.getString(2));
+					image.add(cursor.getString(3));
+					image.add(cursor.getString(4));
+				
+					images.add(image);
+				} while (cursor.moveToNext());
+			}
+			db.close();
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return images;
+		
+	}
+	
+
+	public ArrayList<List<String>> getAllDataList(String tblName,String condition_field,String condition,String order_by)
+	{	
+		
+		ArrayList<List<String>> images = new ArrayList<List<String>>();
+		try{	
+			SQLiteDatabase db = this.getWritableDatabase();			
+				
+			//String selectQuery = "SELECT  * FROM " + tblName +" Group by 2 ";  
+			
+			//String selectQuery = "SELECT * FROM " + tblName + " Where "+KEY_SLUMID+" ='"+Condition+"'";
+			String selectQuery = "SELECT * FROM " + tblName + " Where "+condition_field+" ='"+condition+"'";
+			if(order_by.length() > 0)
+			{
+				selectQuery =selectQuery+" order by "+order_by;
+			}
+			
+			
+			Cursor cursor = db.rawQuery(selectQuery, null);
+			//Iterate and insert to array object
+			if (cursor.moveToFirst()) {
+				do {
+					List<String> image = new ArrayList<String>();
+					image.add(cursor.getString(0));//pk
+					image.add(cursor.getString(1)); //slumcode
+					image.add(cursor.getString(2));//Drawable Compo
+					image.add(cursor.getString(3));//name
+					image.add(cursor.getString(4));//created date
+					image.add(cursor.getString(5));//lat long
+					
+					images.add(image);
+				} while (cursor.moveToNext());
+			}
+			db.close();
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return images;
+		
+	}
+	
+	public ArrayList<List<String>> getComponentName(String slumId,String componentId)
+	{	
+		
+		ArrayList<List<String>> images = new ArrayList<List<String>>();
+		try{	
+			SQLiteDatabase db = this.getWritableDatabase();			
+				
+			//String selectQuery = "SELECT  * FROM " + tblName +" Group by 2 ";  
+			
+			String selectQuery = "SELECT "+KEY_NAME +"," +KEY_CREAT_DATE +				
+									" FROM " + TABLE_PLOTTEDSHAPE_GROUP +
+									" Where "+ KEY_SLUMID +"='"+slumId +"' and "+ KEY_DRAWABLE_COMPONENT+ " = '"+componentId+"'" +
+									" ORDER BY "+KEY_CREAT_DATE +" ";
+			Cursor cursor = db.rawQuery(selectQuery, null);
+			//Iterate and insert to array object
+			if (cursor.moveToLast()) {
+				do {
+					List<String> image = new ArrayList<String>();
+					image.add(cursor.getString(0));
+					image.add(cursor.getString(1));			
+					
+					images.add(image);
+					
+				} while (cursor.moveToNext());
+			}
+			db.close();
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return images;
+		
+	}
+	
+	
+	public ArrayList<List<String>> getId(String slumId, String compo, String names, String dates, String lats)
+	{	
+		
+		ArrayList<List<String>> images = new ArrayList<List<String>>();
+		try{	
+			SQLiteDatabase db = this.getWritableDatabase();			
+			String selectQuery = "SELECT "+KEY_PK + " FROM " + TABLE_PLOTTEDSHAPE_GROUP + " Where "+								
+									KEY_SLUMID+" ='"+slumId+"' and "+
+									KEY_DRAWABLE_COMPONENT+" ='"+compo+"' and " +
+									KEY_NAME+" ='"+names+"' and "+
+									KEY_CREAT_DATE+" ='"+dates+"' and "+
+									KEY_LATLONG+" ='"+lats+"'";
+			
+			
+			
+			Cursor cursor = db.rawQuery(selectQuery, null);
+			//Iterate and insert to array object
+			if (cursor.moveToFirst()) {
+				do {
+					List<String> image = new ArrayList<String>();
+					image.add(cursor.getString(0));//pk
+										
+					images.add(image);
+				} while (cursor.moveToNext());
+			}
+			db.close();
+		}
+		catch(Exception e)
+		{
+			Log.e("Shelter",""+e.getMessage());
+		}
+		return images;
+		
+	}
+	
 }
