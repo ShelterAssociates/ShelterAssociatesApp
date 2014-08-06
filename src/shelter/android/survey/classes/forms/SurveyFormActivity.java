@@ -812,10 +812,9 @@ public abstract class SurveyFormActivity extends FormActivity
 		    	    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
 		    	  }
 		    	  else
-		    	  {
-		    		  Toast.makeText(context, "Enable either GPS or Network provider",
-				                Toast.LENGTH_SHORT).show();
-		    	  }
+		    	  {		    		 
+		    		Toast.makeText(context, "Enable either GPS or Network provider",Toast.LENGTH_SHORT).show();		    		
+		    	  }	  
 		    }
 
 			@Override
@@ -829,16 +828,13 @@ public abstract class SurveyFormActivity extends FormActivity
 				// TODO Auto-generated method stub
 				 switch (status) {
 				    case LocationProvider.OUT_OF_SERVICE:
-				        Toast.makeText(context, "Provider out of Service",
-				                Toast.LENGTH_SHORT).show();
+				       // Toast.makeText(context, "Provider out of Service", Toast.LENGTH_SHORT).show();
 				        break;
 				    case LocationProvider.TEMPORARILY_UNAVAILABLE:
-				        Toast.makeText(context, "Provider temporarily Unavailable",
-				                Toast.LENGTH_SHORT).show();
+				       // Toast.makeText(context, "Provider temporarily Unavailable",Toast.LENGTH_SHORT).show();
 				        break;
 				    case LocationProvider.AVAILABLE:
-				        Toast.makeText(context, "Provider Available",
-				                Toast.LENGTH_SHORT).show();
+				      //  Toast.makeText(context, "Provider Available",Toast.LENGTH_SHORT).show();
 				        break;
 				    }
 			}
