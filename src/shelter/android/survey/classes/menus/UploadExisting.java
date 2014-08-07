@@ -240,7 +240,11 @@ public class UploadExisting extends FormActivity {
 									image.put("Latitude", arrImageList.get(j).get(0));
 									image.put("Longitude", arrImageList.get(j).get(1));
 									//Fetch image file and convert to bitmap and then to encode using base64.
-									InputStream inputStream = new FileInputStream(FormActivity.PHOTO_PATH+"/"+FormActivity.PHOTO_FOLDER+"/"+arrImageList.get(j).get(2));//You can get an inputStream using any IO API
+									InputStream inputStream=null;
+									try {
+										inputStream= new FileInputStream(FormActivity.PHOTO_PATH+"/"+FormActivity.PHOTO_FOLDER+"/"+arrImageList.get(j).get(2));//You can get an inputStream using any IO API
+										
+									
 									byte[] bytes;
 									byte[] buffer = new byte[8192];
 									int bytesRead;
@@ -263,6 +267,10 @@ public class UploadExisting extends FormActivity {
 									image.put("Image", image_str);
 									images.put(image);
 									image = new JSONObject();
+									
+									} catch (Exception e) {
+										// TODO: handle exception
+									}
 								} 
 								fact.put("image_list", images);
 								images = new JSONArray();
@@ -283,6 +291,8 @@ public class UploadExisting extends FormActivity {
 							GZIPInputStream surveySystemResponse = (GZIPInputStream) https.getContent();
 							InputStreamReader reader = new InputStreamReader(surveySystemResponse);
 							BufferedReader in = new BufferedReader(reader);
+//							BufferedReader in = new BufferedReader(
+//		                               new InputStreamReader(https.getInputStream()));
 							surveyResponseCode = in.readLine();
 							https.disconnect();
 
@@ -291,13 +301,13 @@ public class UploadExisting extends FormActivity {
 								if (surveyResponseCode.indexOf("1") != -1)
 								{
 									Toast.makeText(getApplicationContext(), "Selected survey(s) uploaded successfully" , Toast.LENGTH_LONG).show();
-									// Locally delete the successfully uploaded surveys.
-									for (int i=0; i<desiredSurveysArray.length; i++) 
-									{
-										// Get questions by survey primary key
-										String surveyPrimaryKey = desiredSurveysArray[i];
-										db.removeSurvey(surveyPrimaryKey);
-									}
+//									// Locally delete the successfully uploaded surveys.
+//									for (int i=0; i<desiredSurveysArray.length; i++) 
+//									{
+//										// Get questions by survey primary key
+//										String surveyPrimaryKey = desiredSurveysArray[i];
+//										db.removeSurvey(surveyPrimaryKey);
+//									}
 									restartActivity();
 								}
 								else if (surveyResponseCode.indexOf("2") != -1)
