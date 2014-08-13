@@ -4,6 +4,7 @@ import shelter.android.survey.classes.menus.*;
 import shelter.android.survey.classes.widgets.*;
 import shelter.android.survey.classes.menus.Index;
 
+import java.io.File;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -24,9 +25,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.location.LocationProvider;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -34,6 +45,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Toast;
+import android.widget.LinearLayout.LayoutParams;
 
 /**
  * SurveyFormActivity is an extension of FormActivity.
@@ -53,7 +65,15 @@ public abstract class SurveyFormActivity extends FormActivity
 	Boolean partOfSub = false;
 	public DatabaseHandler db = new DatabaseHandler(this);
 	ArrayList<String> subSects = new ArrayList<String>();
-
+	public static Activity activity;
+	public static String m_sFileName = "";
+	public static String cameraFile = "";
+	public static File objFilePhoto;
+	public static LocationManager locationManager=null;
+	LocationListener locationListener;
+	public String provider;
+	public Boolean flag;
+	Location lastKnownLocation=null;
 	// -----------------------------------------------
 	//
 	// parse data and build view
@@ -79,16 +99,17 @@ public abstract class SurveyFormActivity extends FormActivity
 		final String key = params[4];
 		final String survey = params[5];
 		final String householdId = params[6];
-		
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		activity = this;
 		try
 		{
-			
+			//call to set up the location listener
+			setGeoLocation();
 			
 			String name;
 			FormWidget widget;
 			JSONObject property = null;
 			JSONObject schema = new JSONObject( data );
-
 
 			JSONArray sections = schema.getJSONArray("sections");
 			if (sectionName.equals("")) {
@@ -120,7 +141,7 @@ public abstract class SurveyFormActivity extends FormActivity
 			}
 
 			JSONObject question;
-
+			
 
 			for( int i= 0; i < questions.length(); i++ ) 
 			{
@@ -143,7 +164,7 @@ public abstract class SurveyFormActivity extends FormActivity
 				if( widget == null) continue;
 				widget.setPriority( priority );
 				widget.setValue( defaultValue );
-
+			
 				if(partOfSub)
 				{
 					Pattern pattern = Pattern.compile("([0-9]+$)");
@@ -170,9 +191,8 @@ public abstract class SurveyFormActivity extends FormActivity
 				{
 					widget.setRequired(true);
 				}
-
+				
 				_widgets.add( widget );
-
 				_map.put( name, widget );
 			}
 
@@ -376,10 +396,14 @@ public abstract class SurveyFormActivity extends FormActivity
 		try
 		{
 			FormWidget widget;
+			//Added to delete photos which are not linked
+			db.deletePhotos();
 			for( int i = 0; i< _widgets.size(); i++) 
 			{
 				widget = _widgets.get(i);
 				widget.setValue(db.getValue(widget.getId(), widget.getSub(), key));
+				//Added to set photos back to image view list from database.
+				widget.setImageValues(this,db.getImages(widget.getId(), widget.getSub(), key));
 			}
 		}
 		catch (IndexOutOfBoundsException e)
@@ -652,12 +676,14 @@ public abstract class SurveyFormActivity extends FormActivity
 	{
 		FormWidget widget = _widgets.get(0);
 		this.db = db;
-
 		for( int i = 0; i < _widgets.size(); i++)
 		{
 			widget = _widgets.get(i);
 			db.createOrUpdateFact(widget.getId(), widget.getValue(), widget.getSub(), survey);
+			db.insertImages(widget._imgArray, widget.getId(),widget.getSub(), survey);
+			Log.i("log","inserted");
 		}
+
 		db.setComplete(survey, 0);
 	}
 	
@@ -668,17 +694,21 @@ public abstract class SurveyFormActivity extends FormActivity
 		{
 			String type = property.getString( FormActivity.SCHEMA_KEY_TYPE );
 			String id = property.getString(FormActivity.SCHEMA_KEY_ID);
-
+			Boolean bTakePhoto = false;
+			if (property.has("takePhoto"))
+			{
+				bTakePhoto = property.getBoolean("takePhoto");
+			}
 			if( type.equals( FormActivity.SCHEMA_KEY_STRING) ){
-				return new FormEditText( this, name, id , type );
+				return new FormEditText( this, name, id , type, bTakePhoto );
 			}
 
 			if( type.equals( FormActivity.SCHEMA_KEY_BOOL ) ){
-				return new FormCheckBox( this, name, id, type );
+				return new FormCheckBox( this, name, id, type, bTakePhoto );
 			}
 
 			if( type.equals( FormActivity.SCHEMA_KEY_INT) ){
-				return new FormNumericEditText( this, name, id, type );
+				return new FormNumericEditText( this, name, id, type, bTakePhoto );
 			}
 
 
@@ -687,7 +717,7 @@ public abstract class SurveyFormActivity extends FormActivity
 				if (property.has(FormActivity.SCHEMA_KEY_OPTIONS ) )
 				{
 					JSONObject options = property.getJSONObject( FormActivity.SCHEMA_KEY_OPTIONS );
-					return new FormMultiCheckBox( this, name, options, id, type ) ;
+					return new FormMultiCheckBox( this, name, options, id, type, bTakePhoto ) ;
 				}
 			}
 
@@ -696,7 +726,7 @@ public abstract class SurveyFormActivity extends FormActivity
 				if( property.has( FormActivity.SCHEMA_KEY_OPTIONS ) ) 
 				{
 					JSONObject options = property.getJSONObject( FormActivity.SCHEMA_KEY_OPTIONS );
-					return new FormSpinner(  this, name, options, id, type );
+					return new FormSpinner(  this, name, options, id, type, bTakePhoto );
 				}
 			}
 		} catch( JSONException e ) {
@@ -705,4 +735,125 @@ public abstract class SurveyFormActivity extends FormActivity
 		return null;
 	}
 	
+	/*To get results of camera activity*/
+	private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+	
+	/**
+	 * Function called after camera capture.
+	 */
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		String strlat = "";
+		String strlong= "";
+		if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+	        
+	    	if (resultCode == RESULT_OK) 
+	        {
+	        	if(objFilePhoto==null){
+	                if(cameraFile!=null)
+	                	objFilePhoto = new File(cameraFile);
+	                else
+	                    Log.e("check", "camera file object null");
+	            }else{
+	            	 Log.e("check", objFilePhoto.getAbsolutePath());
+	            }
+	        	
+	        	//Fetch the widget to which take photo was clicked.
+	        	FormWidget widget = _widgets.get(0);
+	        	FormWidget clickedWidget=_widgets.get(0);
+	    		for( int i = 0; i < _widgets.size(); i++)
+	    		{
+	    			widget = _widgets.get(i);
+	    			if(widget.getId() == m_id)
+	    			{
+	    				clickedWidget = widget;
+	    			}
+	    		}
+	    		
+	    		//Fetch the current location.
+	    		lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	    		//check if location object not null
+	    		if (lastKnownLocation != null)
+	    		{
+	    			Toast.makeText(this, " : "+lastKnownLocation.getLatitude()+" : "+lastKnownLocation.getLongitude(), Toast.LENGTH_SHORT).show();
+		    		//Insert photo details to database and also add to imageview list.
+	    			clickedWidget.addSingleImage(m_sFileName,this,""+lastKnownLocation.getLatitude(),""+lastKnownLocation.getLongitude());//+objLocation.getLatitude(),""+objLocation.getLongitude());
+	    		}
+	    		else
+		    	{
+	    			Toast.makeText(this, " : Location not found", Toast.LENGTH_SHORT).show();
+		    		////Insert photo details to database and also add to imageview list.
+		    		clickedWidget.addSingleImage(m_sFileName,this,"","");//+objLocation.getLatitude(),""+objLocation.getLongitude());
+		    	}
+	        } 
+	    	
+	    }
+	}	
+
+	/**
+	 * Function to set the location listener
+	 */
+	public void setGeoLocation()
+	{		
+		// Define a listener that responds to location updates
+		try{
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		final Context context = this;
+		 locationListener = new LocationListener() {
+		 
+		    public void onProviderEnabled(String provider) {
+		    	
+		    }
+
+		    public void onProviderDisabled(String provider) {
+		    	locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);   
+		    	  if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+		    	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+		    	  } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+		    	    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+		    	  }
+		    	  else
+		    	  {		    		 
+		    		Toast.makeText(context, "Enable either GPS or Network provider",Toast.LENGTH_SHORT).show();		    		
+		    	  }	  
+		    }
+
+			@Override
+			public void onLocationChanged(Location location) {
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void onStatusChanged(String provider,
+					int status, Bundle extras) {
+				// TODO Auto-generated method stub
+				 switch (status) {
+				    case LocationProvider.OUT_OF_SERVICE:
+				       // Toast.makeText(context, "Provider out of Service", Toast.LENGTH_SHORT).show();
+				        break;
+				    case LocationProvider.TEMPORARILY_UNAVAILABLE:
+				       // Toast.makeText(context, "Provider temporarily Unavailable",Toast.LENGTH_SHORT).show();
+				        break;
+				    case LocationProvider.AVAILABLE:
+				      //  Toast.makeText(context, "Provider Available",Toast.LENGTH_SHORT).show();
+				        break;
+				    }
+			}
+		  };
+		 
+		  //Set up the location listener.
+		  if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+	    	    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+	    	  } else if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+	    	    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+	    	  }
+	    	  else
+	    	  {
+	    		  Toast.makeText(context, "Enable either GPS or Network provider and start again",
+			                Toast.LENGTH_LONG).show();
+	    	  }
+		 }catch(Exception e){
+			Log.i("Shelter","------"+e);
+		}
+	}
+
 }

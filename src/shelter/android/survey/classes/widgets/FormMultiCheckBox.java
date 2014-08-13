@@ -27,7 +27,7 @@ public class FormMultiCheckBox extends FormWidget{
 	protected ArrayList<Integer> _order;
 	protected TextView _label;
 	protected String _id;
-
+	
 	String name;
 	String p;
 	String result;
@@ -46,7 +46,7 @@ public class FormMultiCheckBox extends FormWidget{
 	//
 	// -----------------------------------------------
 
-	public FormMultiCheckBox( Context context, String property, JSONObject options, String id, String type)
+	public FormMultiCheckBox( Context context, String property, JSONObject options, String id, String type, Boolean bTakePhoto)
 	{
 		super( context, property );
 		_order = new ArrayList<Integer>();
@@ -91,6 +91,9 @@ public class FormMultiCheckBox extends FormWidget{
 				_checkbox.setTextAppearance(context,R.style.CustomCheckBox);
 
 			}
+			
+			//Added by SC : to add take photo button if applicable
+			AddPhotoLayout(context, bTakePhoto);
 		}
 		catch(JSONException e){
 			e.printStackTrace();

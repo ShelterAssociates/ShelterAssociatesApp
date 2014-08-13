@@ -63,6 +63,29 @@ public class SlumSelect extends FormActivity
 				}
 			}
 		});
+		
+		
+		 // Prepare the 'MapView' button
+		Button mapbt = new Button(this);
+		mapbt.setText("View Map");
+		mapbt.setLayoutParams(new LayoutParams(LayoutParams.FILL_PARENT, 50));
+		mapbt.setOnClickListener(new OnClickListener() {           
+			@Override
+			public void onClick(View v) {
+				
+				if(getName(0).equals(" Make a Selection"))
+				{
+					Toast.makeText(getApplicationContext(), "Please select a slum!" , Toast.LENGTH_SHORT).show();
+				}				
+				else
+				{				
+					Intent intent = new Intent(SlumSelect.this,EditMap.class);
+					intent.putExtra("slumID", get(0)); // slum should be the chosen spinner value					
+					startActivity(intent);
+				}
+			}
+		});
+		
 		// Parse JSON
 		FileInputStream file;
 		try {
@@ -81,12 +104,18 @@ public class SlumSelect extends FormActivity
     		spacer.setHeight(15);
     		layout.addView(spacer);
         	layout.addView(bt);
+        	
+        	TextView spacer1 = new TextView(this);
+        	spacer1.setHeight(15);
+    		layout.addView(spacer1);
+        	layout.addView(mapbt);
         	setContentView(layout);
+        	
         }  catch (JSONException e) {
     		Log.e("JSON Parser", "Error parsing data " + e.toString());
     	} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-        
+          
     }
 }

@@ -27,5 +27,13 @@
         android:text="@string/index_download"
         android:textSize="20sp"
         android:height = "50sp" />
+    
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="goToOnlineMapUpload"
+        android:text="@string/index_onlineMapUpload"
+        android:textSize="20sp"
+        android:height = "50sp" />
 
 </LinearLayout>

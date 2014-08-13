@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" 
+    android:background="@color/Black"
+    android:weightSum="5">
+    
+<TextView
+       android:id="@+id/textView1"
+       android:layout_width="match_parent"
+       android:layout_height="0dp"
+       android:text="Name of Shape" 
+       android:layout_gravity="center"
+       android:textColor="@color/White"
+       android:layout_weight="1"
+       android:layout_marginLeft="10dp"
+       android:layout_marginTop="10dp"
+       />
+
+<EditText
+    android:id="@+id/editTextDialogUserInput"
+    android:layout_width="200dp"
+    android:layout_height="0dp"
+    android:layout_marginLeft="15dp"
+     android:background="@color/Gray"
+     android:textColor="@color/Black"
+    android:lines="8"
+    android:gravity="top|left"
+    android:inputType="textMultiLine"
+    android:scrollHorizontally="false" 
+    android:layout_weight="2"
+   
+/>
+
+<Button
+android:id="@+id/btn_OK_popup"
+android:layout_width="match_parent"
+android:layout_height="0dp"
+android:layout_gravity="center"
+android:text="OK"
+android:textColor="@color/Black"
+android:layout_weight="1"
+ />
+
+<Button
+android:id="@+id/btn_close_popup"
+android:layout_width="match_parent"
+android:layout_height="0dp"
+android:layout_gravity="center"
+android:text="Close"
+android:textColor="@color/Black"
+android:layout_weight="1"
+ />
+
+</LinearLayout>

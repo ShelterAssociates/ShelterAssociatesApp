@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/linear"
+    android:orientation="horizontal"
+    android:background="@color/redback"
+    android:weightSum="5" 
+    >       
+           
+    
+        <TextView
+            android:id="@+id/txtChild"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:textSize="17sp"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="2dp"
+            android:textColor="@color/Black"
+            android:layout_weight="3"
+            android:focusable="false"
+        	android:focusableInTouchMode="false"    
+        >
+        </TextView>
+        
+		<Button
+		    android:id="@+id/btn_edit"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"		    
+		    android:layout_gravity="right"
+		    android:text="Edit"
+		    android:layout_weight="1"
+		    android:focusable="false"
+        	android:focusableInTouchMode="false"
+		    android:textColor="@color/Black" />
+		
+		<Button
+		    android:id="@+id/btn_delete"
+		    android:layout_width="0dp"
+		    android:layout_height="wrap_content"
+		    android:layout_gravity="right"
+		    android:text="Delete"
+		    android:layout_weight="1"
+		    android:focusable="false"
+        	android:focusableInTouchMode="false"
+		    android:textColor="@color/Black" />
+
+</LinearLayout>

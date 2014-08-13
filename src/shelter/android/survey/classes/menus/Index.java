@@ -101,10 +101,20 @@ public class Index extends InternetUtils {
 			alertConnectionUnavailable();
 		}
 	}
-
-
-
-
+	
+	public void goToOnlineMapUpload(View view)
+	{
+		if (isNetworkAvailable()==true)
+		{
+			Intent intent = new Intent(Index.this, UploadMap.class);
+			startActivity(intent);
+		}
+		else
+		{
+			alertConnectionUnavailable();
+		}
+	}
+	
 	@Override
 	public void onBackPressed()
 	{

@@ -1,10 +1,14 @@
 package shelter.android.survey.classes.menus;
 import shelter.android.survey.classes.forms.*;
 import shelter.android.survey.classes.widgets.*;
+
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -14,6 +18,7 @@ import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -30,8 +35,10 @@ import org.json.JSONObject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Looper;
 import android.text.InputType;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -135,7 +142,12 @@ public class UploadExisting extends FormActivity {
 					Toast.makeText(getApplicationContext(), "You didn't select any surveys!" , Toast.LENGTH_LONG).show();
 					return;
 				}
-
+				//Create the directory if not available
+				String root = Environment.getExternalStorageDirectory().toString();
+				final File myDir = new File(root + "/ShelterPhotos");
+				myDir.mkdirs();
+				
+				
 				Thread t = new Thread() {
 
 					public void run() {
@@ -189,12 +201,13 @@ public class UploadExisting extends FormActivity {
 								for (int j=0; j<questions.size(); j++)
 								{
 									ArrayList<String> question = new ArrayList<String>();
-									question.add(questions.get(j).get(0)); // QID
-									question.add(questions.get(j).get(1)); // Fact
+									question.add(questions.get(j).get(1)); // QID
+									question.add(questions.get(j).get(2)); // Fact
 									question.add(survey.get(0)); // Survey
 									question.add(survey.get(1)); // Slum
 									question.add(survey.get(2)); // Household
 									question.add(questions.get(j).get(3)); // sub_code
+									question.add(questions.get(j).get(0)); // fact pk
 									// Add this question to the pile
 									questionsToUpload.add(question); 
 								}
@@ -216,36 +229,85 @@ public class UploadExisting extends FormActivity {
 								fact.put("slum", questionsToUpload.get(i).get(3));
 								fact.put("household",questionsToUpload.get(i).get(4));
 								fact.put("sub_code", questionsToUpload.get(i).get(5));
+								
+								//Code added by SC:
+								//Code to send photos to server.
+								ArrayList<List<String>> arrImageList = db.getImageList(questionsToUpload.get(i).get(6));
+								JSONArray images = new JSONArray();
+								JSONObject image = new JSONObject();
+								for (int j=0; j<arrImageList.size(); j++)
+								{
+									image.put("Latitude", arrImageList.get(j).get(0));
+									image.put("Longitude", arrImageList.get(j).get(1));
+									//Fetch image file and convert to bitmap and then to encode using base64.
+									InputStream inputStream=null;
+									try {
+										inputStream= new FileInputStream(FormActivity.PHOTO_PATH+"/"+FormActivity.PHOTO_FOLDER+"/"+arrImageList.get(j).get(2));//You can get an inputStream using any IO API
+										
+									
+									byte[] bytes;
+									byte[] buffer = new byte[8192];
+									int bytesRead;
+									ByteArrayOutputStream output = new ByteArrayOutputStream();
+									try {
+									    while ((bytesRead = inputStream.read(buffer)) != -1) {
+									    output.write(buffer, 0, bytesRead);
+									}
+									} catch (IOException e) {
+									e.printStackTrace();
+									}
+									inputStream.close();
+									bytes = output.toByteArray();											
+//									 ByteArrayOutputStream baoPhoto = new ByteArrayOutputStream();
+//									    GZIPOutputStream zos = new GZIPOutputStream(baoPhoto);
+//									    zos.write(bytes);
+//									    zos.close(); 
+//									    bytes = baoPhoto.toByteArray();								
+									String image_str = Base64.encodeToString(bytes, Base64.DEFAULT);
+									image.put("Image", image_str);
+									images.put(image);
+									image = new JSONObject();
+									
+									} catch (Exception e) {
+										// TODO: handle exception
+									}
+								} 
+								fact.put("image_list", images);
+								images = new JSONArray();
 								facts.put(fact);
 							}
 							json.put("facts", facts);
-
 							// Set about uploading via HTTPS
+							facts=null;
+							questionsToUpload = null;
 							DataOutputStream wr = new DataOutputStream(https.getOutputStream ());
+							
 							wr.writeBytes(json.toString());
 							wr.flush();
 							wr.close();
+							json=null;
 							httpResponseCode = https.getResponseCode();
 							// Read the response
 							GZIPInputStream surveySystemResponse = (GZIPInputStream) https.getContent();
 							InputStreamReader reader = new InputStreamReader(surveySystemResponse);
 							BufferedReader in = new BufferedReader(reader);
+//							BufferedReader in = new BufferedReader(
+//		                               new InputStreamReader(https.getInputStream()));
 							surveyResponseCode = in.readLine();
 							https.disconnect();
 
 							// If the HTTP response is 200 (i.e. the server was reached), check the surveyResponseCode
 							if(httpResponseCode == 200){
-
 								if (surveyResponseCode.indexOf("1") != -1)
 								{
 									Toast.makeText(getApplicationContext(), "Selected survey(s) uploaded successfully" , Toast.LENGTH_LONG).show();
-									// Locally delete the successfully uploaded surveys.
-									for (int i=0; i<desiredSurveysArray.length; i++) 
-									{
-										// Get questions by survey primary key
-										String surveyPrimaryKey = desiredSurveysArray[i];
-										db.removeSurvey(surveyPrimaryKey);
-									}
+//									// Locally delete the successfully uploaded surveys.
+//									for (int i=0; i<desiredSurveysArray.length; i++) 
+//									{
+//										// Get questions by survey primary key
+//										String surveyPrimaryKey = desiredSurveysArray[i];
+//										db.removeSurvey(surveyPrimaryKey);
+//									}
 									restartActivity();
 								}
 								else if (surveyResponseCode.indexOf("2") != -1)
@@ -285,6 +347,7 @@ public class UploadExisting extends FormActivity {
 		setContentView(sv);
 	}
 
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

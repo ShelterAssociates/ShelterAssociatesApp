@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+	<LinearLayout 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+        
+     <fragment 
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.MapFragment"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight=".90"
+        />         
+      
+     <LinearLayout             
+            android:layout_width="match_parent"
+    		android:layout_height="wrap_content"
+    		android:orientation="horizontal" 
+    		android:layout_weight=".1"
+    		 android:weightSum="5">
+     
+     <Button
+        android:id="@+id/mnew"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+         android:layout_weight="1"
+        android:text="Add new" />
+     <Button
+        android:id="@+id/medit"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+         android:layout_weight="1"
+        android:text="Edit" />
+     
+     <Button
+        android:id="@+id/msave"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+         android:layout_weight="1"
+        android:text="Save" />
+     
+     <Button
+        android:id="@+id/mclear"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+         android:layout_weight="1"
+        android:text="Clear" />
+     
+     <Button
+        android:id="@+id/mpolygon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+         android:layout_weight="1"
+        android:text="Polygon" />
+     
+     
+     </LinearLayout>      
+     
+</LinearLayout>
+
+<ListView
+        android:id="@+id/left_drawer"
+        android:layout_width="350dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:choiceMode="singleChoice"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:background="#111" />
+
+
+</android.support.v4.widget.DrawerLayout>
+  

@@ -13,7 +13,7 @@ public class FormCheckBox extends FormWidget
 	protected String 		_id;
 	protected String 		_type;
 	
-	public FormCheckBox( Context context, String property, String id, String type ) 
+	public FormCheckBox( Context context, String property, String id, String type, Boolean bTakePhoto ) 
 	{
 		super( context, property );
 
@@ -21,8 +21,10 @@ public class FormCheckBox extends FormWidget
 		_checkbox.setText( this.getDisplayText() );
 		_id = id;
 		_type = type;
-		
 		_layout.addView( _checkbox );
+		
+		//Added by SC : to add take photo button if applicable
+		AddPhotoLayout(context, bTakePhoto);
 	}
 	
 	public String getType()

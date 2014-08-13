@@ -3,6 +3,9 @@ package shelter.android.survey.classes.menus;
 import shelter.android.survey.classes.forms.*;
 import shelter.android.survey.classes.menus.Index;
 import shelter.android.survey.classes.widgets.*;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -12,6 +15,7 @@ import java.net.URL;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -36,6 +40,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -351,6 +356,34 @@ public class MainSurvey extends SurveyFormActivity
 										fact.getInt("sub_code"),
 										key);
 								
+								try{
+								//Code added by SC : Code to fetch photos back to edit the details
+								JSONArray fact_images = new JSONArray(fact.getString("image_list"));
+								ArrayList<List<String>> arr_FactImage = new ArrayList<List<String>>();
+								//Iterating through the photos available to survey fact.
+								for(int j = 0; j<fact_images.length(); j++)
+								{
+									JSONObject fact_image = fact_images.getJSONObject(j);
+									List<String> image = new ArrayList<String>();
+									
+									image.add(fact_image.getString("Latitude")); // Latitude
+									image.add(fact_image.getString("Longitude")); // Longitude
+									String sFileName = fact_image.getString("ImageName");
+									File objFile = new File(FormActivity.PHOTO_PATH+"/"+FormActivity.PHOTO_FOLDER+"/"+sFileName);
+									if (!objFile.exists()) {
+										objFile.createNewFile();
+										}
+									BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(objFile));
+									bos.write(Base64.decode(fact_image.getString("Image"),Base64.DEFAULT));
+									bos.flush();
+									bos.close();
+									
+									image.add(sFileName); // Bitmap
+									arr_FactImage.add(image);
+								}
+								//Inserting to database table
+								db.insertImages(arr_FactImage, fact.getString("code"), fact.getInt("sub_code"), key);
+								}catch(Exception e){Log.i("Shelter",""+e.getMessage());}
 							}
 							
 							Toast.makeText(getBaseContext(), "Download successful." , Toast.LENGTH_LONG).show();
