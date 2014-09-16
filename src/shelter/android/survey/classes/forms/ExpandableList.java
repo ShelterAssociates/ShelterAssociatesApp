@@ -64,7 +64,7 @@ public class ExpandableList extends BaseExpandableListAdapter {
 			boolean isLastChild, View convertView, final ViewGroup parent) {
 		
 		final String childText = (String) getChild(groupPosition, childPosition);
-		final String[] C_split = childText.split(",");
+		final String[] C_split = childText.split("_");
 		 
 		if (convertView == null) {
 			LayoutInflater infalInflater = (LayoutInflater) this._context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -86,6 +86,7 @@ public class ExpandableList extends BaseExpandableListAdapter {
 				intent.putExtra("slumID", C_split[1].toString());
 				intent.putExtra("surveyId", C_split[2].toString());
 				intent.putExtra("slumbutton", "edit");
+				intent.putExtra("slumName", C_split[4].toString());
 
 				_context.startActivity(intent);
 				((Activity) _context).finish();
@@ -185,9 +186,9 @@ public class ExpandableList extends BaseExpandableListAdapter {
 			    	String str = getChilds(groupPosition).get(i);
 			    	
 			    	if(chkSelect.isChecked())
-			    		s_id = s_id + ",|" + str.split(",")[0].toString()+ "|";
+			    		s_id = s_id + ",|" + str.split("_")[0].toString()+ "|";
 			    	else
-			    		s_id = s_id.replace(",|" + str.split(",")[0].toString() + "|",	"");	
+			    		s_id = s_id.replace(",|" + str.split("_")[0].toString() + "|",	"");	
 			    }
 
 			    if (g_id.contains(",|" + groupPosition+ "|")) {
@@ -199,6 +200,7 @@ public class ExpandableList extends BaseExpandableListAdapter {
                 notifyDataSetChanged();
 			}
 		});
+		
 		if (g_id.contains(",|" + groupPosition+ "|")) {
 			chkSelect.setChecked(true);
 		} else {
