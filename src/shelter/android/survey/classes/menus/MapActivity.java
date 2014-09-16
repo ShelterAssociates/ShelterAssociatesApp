@@ -1,13 +1,20 @@
 package shelter.android.survey.classes.menus;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,6 +33,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Base64;
 import android.util.Log;
@@ -82,6 +90,7 @@ public class MapActivity extends Activity implements OnMapClickListener,
 	String lineColor = "";
 	String iconstring = "";
 	String slumId = "";
+	String slumname = "";
 	String SID = "";
 	String flag = "";
 	String compoName="";
@@ -133,7 +142,8 @@ public class MapActivity extends Activity implements OnMapClickListener,
 			iconstring=mydata.optString("icon");
 			compoName=mydata.optString("name");
 			
-			SID = intent.getExtras().getString("SID");				
+			SID = intent.getExtras().getString("SID");	
+			slumname=intent.getExtras().getString("slumName");
 		}
 
 		edMap = false;
@@ -191,7 +201,8 @@ public class MapActivity extends Activity implements OnMapClickListener,
 			if (intent.hasExtra("slumID")) {
 				SID = intent.getExtras().getString("SID");
 				SIDEdit=intent.getExtras().getString("SIDEdit");
-				slumId = intent.getExtras().getString("slumID");				
+				slumId = intent.getExtras().getString("slumID");	
+				slumname=intent.getExtras().getString("slumName");
 				flag = intent.getExtras().getString("slumbutton");	
 								
 				buttonVisible(flag);
@@ -953,6 +964,7 @@ public class MapActivity extends Activity implements OnMapClickListener,
 		Intent intent = new Intent(getApplicationContext(), EditMap.class);
 
 		intent.putExtra("slumID", slumId);
+		intent.putExtra("slumName", slumname);
 		startActivity(intent);
 		// call finish it will finish this activity : Avoid open activity
 		// multiple time
@@ -1260,7 +1272,6 @@ public class MapActivity extends Activity implements OnMapClickListener,
 	}
 
 	public void viewData() {
-
 		try {
 
 			/******************************* Slum Border ******************************************/
@@ -1303,6 +1314,8 @@ public class MapActivity extends Activity implements OnMapClickListener,
 			//C_dragflag=false;
 			
 			viewDrawLines(viewltpoints);
+			/*************************************************************************/
+			getCoordinateArrays();		
 
 			/**************************** Design On Slum ***************************************/
 
@@ -1813,6 +1826,77 @@ public class MapActivity extends Activity implements OnMapClickListener,
 		builder.setMessage("Are you sure, you want to save data?")
 				.setPositiveButton("Yes", dialogClickListener)
 				.setNegativeButton("No", dialogClickListener).show();
+	}
+	
+	/***************************** Kml File Read And Display On Map **********************************************/
+	
+	public ArrayList<ArrayList<LatLng>> getCoordinateArrays() {
+	    ArrayList<ArrayList<LatLng>> allTracks = new ArrayList<ArrayList<LatLng>>();
+
+	    try {
+	        StringBuilder buf = new StringBuilder();
+	        File dir = Environment.getExternalStorageDirectory();  
+	        //File f_path = new File("storage/sdcard0/shelterkml/" + slumname + ".kml");
+	        File f_path = new File(dir,"/shelterkml/" + slumname + ".kml");
+	        
+	        // InputStream json = getApplication().getAssets().open("LegendKML.kml");
+	        
+	        InputStream json = new BufferedInputStream(new FileInputStream(f_path));
+	        
+	        BufferedReader in = new BufferedReader(new InputStreamReader(json));
+	        String str;
+	        String buffer;
+	        while ((str = in.readLine()) != null) {
+	            buf.append(str);
+	        }
+
+	        in.close();
+	        String html =buf.toString();
+	        Pattern pattern = Pattern.compile("<coordinates>(.*?)</coordinates>");
+	        Matcher matcher = pattern.matcher(html);
+	        String[] val = null ;
+	        while (matcher.find()) {
+	           // System.out.println(matcher.group(1));
+	            
+	            String[] C_sp = matcher.group(1).toString().trim().split(" ");
+
+				
+	            ArrayList<LatLng> kmlpoints = new ArrayList<LatLng>();
+				int k=1;
+				String lat="";
+				String lang="";
+				for (int i = 0; i < C_sp.length; i++) {
+
+					String[] C_sp1 = C_sp[i].toString().trim().split(",");
+					
+					for (int j = 0; j < C_sp1.length; j++) {
+						if(k==1)
+						{
+							lat=C_sp1[j].toString();
+							k++;
+						}
+						else if(k==2){
+							lang=C_sp1[j].toString();
+							
+							LatLng allLatLng = new LatLng(Double.parseDouble(lang), 
+									Double.parseDouble(lat));
+							kmlpoints.add(allLatLng);
+							k++;
+							
+						}else if(k==3)
+						{
+							k=1;
+						}							
+					}							
+				}			
+				viewDrawLines(kmlpoints);				
+	        }
+	        
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return allTracks;
 	}
 	
 	
