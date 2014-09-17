@@ -39,6 +39,7 @@ public class EditMap extends FormActivity {
 
 	String slum_id = "";
 	String s_id = "";	
+	String slum_name="";
 	DatabaseHandler db;
 	ExpandableList listAdapter;
 	Boolean bCheckedFlag = true;
@@ -52,6 +53,7 @@ public class EditMap extends FormActivity {
 		Intent intent = getIntent();
 		if (intent.hasExtra("slumID")) {
 			slum_id = intent.getExtras().getString("slumID");
+			slum_name= intent.getExtras().getString("slumName");
 		}
 
 		db = new DatabaseHandler(this);
@@ -119,13 +121,24 @@ public class EditMap extends FormActivity {
 								
 								listDataHeader.add(name.getString("name") + " " + name.getString("extra"));								
 							}
+//							//Adding all values in a_line array 
+//							a_line.add(tbl.get(j).get(0).toString() + ";" 	//pk_id
+//									+ tbl.get(j).get(1).toString() + ";"  	//slim_id
+//									+ tbl.get(j).get(2).toString() + ";" 	//shape_id
+//									+ name.getString("name") + ":"       	// Name : shape with name
+//									+ name.getString("extra") + ":"      	// shape with dimension
+//									+ tbl.get(j).get(3).toString()+";"      //name of shape specify by user
+//									+ slum_name);     						//Slum Name;     	
+							
 							//Adding all values in a_line array 
-							a_line.add(tbl.get(j).get(0).toString() + "," 	//pk_id
-									+ tbl.get(j).get(1).toString() + ","  	//slim_id
-									+ tbl.get(j).get(2).toString() + "," 	//shape_id
+							a_line.add(tbl.get(j).get(0).toString() + "_" 	//pk_id
+									+ tbl.get(j).get(1).toString() + "_"  	//slim_id
+									+ tbl.get(j).get(2).toString() + "_" 	//shape_id
 									+ name.getString("name") + ":"       	// Name : shape with name
 									+ name.getString("extra") + ":"      	// shape with dimension
-									+ tbl.get(j).get(3).toString());     	//name of shape specify by user
+									+ tbl.get(j).get(3).toString() +"_"
+									+ slum_name);    //name of shape specify by user
+									  
 							
 							listDataChild.put(name.getString("name") + " "
 									+ name.getString("extra"), a_line);									
@@ -171,6 +184,7 @@ public class EditMap extends FormActivity {
 				//Here listAdapter.returnSid() return all slum selected in Expandable list view
 				intent.putExtra("SID", listAdapter.returnSid().replace("|", ""));
 				intent.putExtra("slumID", slum_id);
+				intent.putExtra("slumName", slum_name);
 				intent.putExtra("slumbutton", "show");
 				startActivity(intent);
 				finish();				
@@ -194,7 +208,7 @@ public class EditMap extends FormActivity {
 					{
 						listAdapter.g_id = listAdapter.g_id + ",|" + i + "|";
 						for (int j=0;j<listDataChild.get(listDataHeader.get(i)).size();j++){
-							listAdapter.s_id = listAdapter.s_id + ",|" + listDataChild.get(listDataHeader.get(i)).get(j).split(",")[0] + "|";
+							listAdapter.s_id = listAdapter.s_id + ",|" + listDataChild.get(listDataHeader.get(i)).get(j).split("_")[0] + "|";
 						}
 					}
 				}
@@ -264,7 +278,8 @@ public class EditMap extends FormActivity {
 					intent.putExtra("SID", listAdapter.returnSid().replace("|", ""));
 				}				
 				
-				intent.putExtra("slumID", slum_id);				
+				intent.putExtra("slumID", slum_id);	
+				intent.putExtra("slumName", slum_name);
 				intent.putExtra("slumbutton", "addnew");
 				startActivity(intent);
 				finish();

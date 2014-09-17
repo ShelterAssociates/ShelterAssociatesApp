@@ -206,7 +206,8 @@ public class UploadExisting extends FormActivity {
 									question.add(survey.get(0)); // Survey
 									question.add(survey.get(1)); // Slum
 									question.add(survey.get(2)); // Household
-									question.add(questions.get(j).get(3)); // sub_code
+									//Change questions.get(j).get(3) to questions.get(j).get(4)
+									question.add(questions.get(j).get(4)); // sub_code
 									question.add(questions.get(j).get(0)); // fact pk
 									// Add this question to the pile
 									questionsToUpload.add(question); 

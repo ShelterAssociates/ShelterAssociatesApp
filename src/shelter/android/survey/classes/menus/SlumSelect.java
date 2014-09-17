@@ -80,7 +80,8 @@ public class SlumSelect extends FormActivity
 				else
 				{				
 					Intent intent = new Intent(SlumSelect.this,EditMap.class);
-					intent.putExtra("slumID", get(0)); // slum should be the chosen spinner value					
+					intent.putExtra("slumID", get(0)); // slum should be the chosen spinner value	
+					intent.putExtra("slumName", getName(0));
 					startActivity(intent);
 				}
 			}
