@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -49,6 +50,7 @@ public class Index extends InternetUtils {
 		if (isNetworkAvailable()==true)
 		{
 			Intent intent = new Intent(this, UploadExisting.class);
+			intent.putExtra("survey_group", "PUNE");
 			startActivity(intent);
 		}
 		else
@@ -69,9 +71,12 @@ public class Index extends InternetUtils {
 					try{
 						Looper.prepare();
 						URL url = new URL("https://survey.shelter-associates.org/android/download/");
+						//URL url = new URL("http://192.168.1.9/android/download/");
+						
 						// Ignore unverified certificate
 						trustAllHosts();
 						HttpsURLConnection https = (HttpsURLConnection) url.openConnection();
+						//HttpURLConnection https = (HttpURLConnection) url.openConnection();
 						https.setHostnameVerifier(DO_NOT_VERIFY);
 						InputStream is = (InputStream) https.getContent();
 
@@ -107,6 +112,36 @@ public class Index extends InternetUtils {
 		if (isNetworkAvailable()==true)
 		{
 			Intent intent = new Intent(Index.this, UploadMap.class);
+			intent.putExtra("survey_group", "PUNE");
+			startActivity(intent);
+		}
+		else
+		{
+			alertConnectionUnavailable();
+		}
+	}
+	
+	public void goToOnlinePCMCUpload(View view)
+	{
+		if (isNetworkAvailable()==true)
+		{
+			Intent intent = new Intent(Index.this, UploadExisting.class);
+			intent.putExtra("survey_group", "PCMC");
+			startActivity(intent);
+		}
+		else
+		{
+			alertConnectionUnavailable();
+		}
+	}
+	
+	
+	public void goToOnlinePCMCMapUpload(View view)
+	{
+		if (isNetworkAvailable()==true)
+		{
+			Intent intent = new Intent(Index.this, UploadMap.class);
+			intent.putExtra("survey_group", "PCMC");
 			startActivity(intent);
 		}
 		else
