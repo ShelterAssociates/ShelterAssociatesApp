@@ -210,7 +210,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 	{
 		ArrayList<List<String>> questions = new ArrayList<List<String>>();
 		SQLiteDatabase db = this.getWritableDatabase();
-		String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE " + KEY_SURVEY + " = " + surveyForeignKey;
+		String selectQuery = "SELECT  * FROM " + TABLE_FACTS + " WHERE " + KEY_SURVEY + " = " + surveyForeignKey ;//+" and "+KEY_SUBSECTION+" <> 0 ";
 		Cursor cursor = db.rawQuery(selectQuery, null);
 
 		if (cursor.moveToFirst()) {
@@ -264,11 +264,21 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 		else return false;
 	}
 
-	public ArrayList<ArrayList<String>> getCompletedSurveys()
+	public ArrayList<ArrayList<String>> getCompletedSurveys(String survey_city)
 	{
 		ArrayList<ArrayList<String>> surveys = new ArrayList<ArrayList<String>>();
 		SQLiteDatabase db = this.getWritableDatabase();
-		String selectQuery = "SELECT  * FROM " + TABLE_SURVEYS + " WHERE " + KEY_COMPLETE + " = 1";
+		//String selectQuery = "SELECT  * FROM " + TABLE_SURVEYS + " WHERE " + KEY_COMPLETE + " = 1";
+		String selectQuery ="";
+		if(survey_city.equalsIgnoreCase("PUNE"))
+		{
+			selectQuery=selectQuery+= "SELECT  * FROM " + TABLE_SURVEYS + " WHERE  "+ KEY_SURVEYID + " Like '%13%' and " + KEY_COMPLETE + " = 1";
+		
+		}else if(survey_city.equalsIgnoreCase("PCMC"))
+		{
+			selectQuery=selectQuery+= "SELECT  * FROM " + TABLE_SURVEYS + " WHERE  "+ KEY_SURVEYID + " Like '%16%' and " + KEY_COMPLETE + " = 1";			
+		}
+		
 		try
 		{
 			Cursor cursor = db.rawQuery(selectQuery, null);
@@ -280,6 +290,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 					singleSurveyData.add(cursor.getString(1)); // Add Survey ID
 					singleSurveyData.add(cursor.getString(2)); // Add Slum ID
 					singleSurveyData.add(cursor.getString(3)); // Add Household ID
+					singleSurveyData.add(cursor.getString(4));
 					surveys.add(singleSurveyData); 
 				} while (cursor.moveToNext());
 			}
@@ -658,10 +669,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 			SQLiteDatabase db = this.getWritableDatabase();			
 				
 			//String selectQuery = "SELECT  * FROM " + tblName +" Group by 2 ";  
-			
+
 			String selectQuery = "SELECT  "+KEY_PK + "," +KEY_SLUMID + "," +KEY_DRAWABLE_COMPONENT + "," +KEY_NAME + "," +KEY_CREAT_DATE+ 
 					
-									" FROM " + TABLE_PLOTTEDSHAPE_GROUP + " Group by "+KEY_SLUMID +" ORDER BY "+KEY_CREAT_DATE;
+					" FROM " + TABLE_PLOTTEDSHAPE_GROUP + " Group by "+KEY_SLUMID +" ORDER BY "+KEY_CREAT_DATE;
+
+			
 			Cursor cursor = db.rawQuery(selectQuery, null);
 			//Iterate and insert to array object
 			if (cursor.moveToFirst()) {
