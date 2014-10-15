@@ -5,10 +5,12 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 import org.json.JSONArray;
@@ -36,7 +38,23 @@ public class UploadMap extends FormActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);	
+		
+		String survey_city="";
+		String survey_city_id="";
+		Intent intent = getIntent();
+		if (intent.hasExtra("survey_group")) {
+			survey_city=intent.getExtras().getString("survey_group");
+			
+			if(survey_city.equalsIgnoreCase("PUNE"))
+			{
+				survey_city_id="13s";
+			}else if(survey_city.equalsIgnoreCase("PCMC"))
+			{
+				survey_city_id="16s";
+			}
+		}
+		
 		
 		final DatabaseHandler db = new DatabaseHandler(this);
 		ScrollView sv = new ScrollView(this);
@@ -59,13 +77,33 @@ public class UploadMap extends FormActivity {
 		try {
 			JSONObject obj = new JSONObject(inputJsonString);
 			JSONObject slums = obj.getJSONObject("slums");
+			/**********************************************/
+			
+			JSONObject survey = obj.getJSONObject(survey_city_id);
+        	JSONObject meta = survey.getJSONObject(SCHEMA_KEY_META);
+        	JSONObject Surslums = meta.getJSONObject("slums"); 
+        	JSONObject Surchoice = Surslums.getJSONObject("choices");
+        	Iterator itr = Surchoice.keys();
+        		    
+			while (itr.hasNext()) {
+				String key = itr.next().toString();
+				for (int i = 0; i < data.size(); i++) {
+					pk = data.get(i).get(1);
 					
-			for (int i = 0; i < data.size(); i++)
-			{		
-					pk=data.get(i).get(1);					
-					surveyDescription= slums.getString(data.get(i).get(1));
-					outputJson.put(pk, surveyDescription);		
+					if (key.equals(pk)) {
+						surveyDescription = slums.getString(data.get(i).get(1));
+						outputJson.put(pk, surveyDescription);
+					}
+				}
 			}
+
+//			/************************************************/
+//			for (int i = 0; i < data.size(); i++)
+//			{		
+//					pk=data.get(i).get(1);					
+//					surveyDescription= slums.getString(data.get(i).get(1));
+//					outputJson.put(pk, surveyDescription);		
+//			}
 		} catch (JSONException e) {
 			Log.e("JSON Parser", "Error parsing data " + e.toString());
 		}
@@ -119,6 +157,7 @@ public class UploadMap extends FormActivity {
 						URL url = null;
 						try {
 							url = new URL("https://survey.shelter-associates.org/android/upload/slum_map/");
+							//url = new URL("http://192.168.1.9/android/upload/slum_map/");
 						} catch (MalformedURLException e2) {
 							// TODO Auto-generated catch block
 							e2.printStackTrace();
@@ -126,13 +165,15 @@ public class UploadMap extends FormActivity {
 						// Ignore unverified certificate
 						trustAllHosts();
 						HttpsURLConnection https = null;
+						//HttpURLConnection https = null;
 						try {
 							https = (HttpsURLConnection) url.openConnection();
+							//https = (HttpURLConnection) url.openConnection();
 						} catch (IOException e2) {
 							// TODO Auto-generated catch block
 							e2.printStackTrace();
 						}
-						//https.setHostnameVerifier(DO_NOT_VERIFY);
+						https.setHostnameVerifier(DO_NOT_VERIFY);
 						https.setDoOutput(true);
 						https.setDoInput(true);
 						https.setInstanceFollowRedirects(false); 

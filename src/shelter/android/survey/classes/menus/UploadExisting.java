@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
@@ -59,6 +60,12 @@ public class UploadExisting extends FormActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		String survey_group="";
+		Intent intent = getIntent();
+		if (intent.hasExtra("survey_group")) {
+			survey_group=intent.getExtras().getString("survey_group");
+		}
+		
 		// Phase 1 - Generate the multi-checkboxes of completed surveys
 		final DatabaseHandler db = new DatabaseHandler(this);
 		ScrollView sv = new ScrollView(this);
@@ -66,7 +73,7 @@ public class UploadExisting extends FormActivity {
 		// [0] = slum ID
 		// [1] = slum name (needs to be looked up from input JSON)
 		String inputJsonString = parseDownloadToString( "all_surveys.json" );
-		ArrayList<ArrayList<String>> complete = db.getCompletedSurveys(); //
+		ArrayList<ArrayList<String>> complete = db.getCompletedSurveys(survey_group); //
 		if (complete.isEmpty())
 		{
 			this.onBackPressed();
@@ -156,6 +163,7 @@ public class UploadExisting extends FormActivity {
 						try {
 							// url = new URL("http://android.blake01.webfactional.com/test/");
 							url = new URL("https://survey.shelter-associates.org/android/upload/");
+							//url = new URL("http://192.168.1.9/android/upload/");
 						} catch (MalformedURLException e2) {
 							// TODO Auto-generated catch block
 							e2.printStackTrace();
@@ -163,13 +171,15 @@ public class UploadExisting extends FormActivity {
 						// Ignore unverified certificate
 						trustAllHosts();
 						HttpsURLConnection https = null;
+						//HttpURLConnection https = null;
 						try {
 							https = (HttpsURLConnection) url.openConnection();
+							//https = (HttpURLConnection) url.openConnection();
 						} catch (IOException e2) {
 							// TODO Auto-generated catch block
 							e2.printStackTrace();
 						}
-						//https.setHostnameVerifier(DO_NOT_VERIFY);
+						https.setHostnameVerifier(DO_NOT_VERIFY);
 						https.setDoOutput(true);
 						https.setDoInput(true);
 						https.setInstanceFollowRedirects(false); 
@@ -289,11 +299,11 @@ public class UploadExisting extends FormActivity {
 							json=null;
 							httpResponseCode = https.getResponseCode();
 							// Read the response
-							GZIPInputStream surveySystemResponse = (GZIPInputStream) https.getContent();
-							InputStreamReader reader = new InputStreamReader(surveySystemResponse);
-							BufferedReader in = new BufferedReader(reader);
-//							BufferedReader in = new BufferedReader(
-//		                               new InputStreamReader(https.getInputStream()));
+//							GZIPInputStream surveySystemResponse = (GZIPInputStream) https.getContent();
+//							InputStreamReader reader = new InputStreamReader(surveySystemResponse);
+//							BufferedReader in = new BufferedReader(reader);
+							BufferedReader in = new BufferedReader(
+		                               new InputStreamReader(https.getInputStream()));
 							surveyResponseCode = in.readLine();
 							https.disconnect();
 

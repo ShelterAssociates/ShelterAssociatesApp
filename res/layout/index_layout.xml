@@ -35,5 +35,21 @@
         android:text="@string/index_onlineMapUpload"
         android:textSize="20sp"
         android:height = "50sp" />
+    
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="goToOnlinePCMCUpload"
+        android:text="@string/index_onlinePCMCUpload"
+        android:textSize="20sp"
+        android:height = "50sp" />
+    
+     <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="goToOnlinePCMCMapUpload"
+        android:text="@string/index_onlinePCMCMapUpload"
+        android:textSize="20sp"
+        android:height = "50sp" />
 
 </LinearLayout>
